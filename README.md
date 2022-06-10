@@ -18,5 +18,14 @@ Nice to have:
 - [ ] Cloud-init setup ready to roll
 - [ ] Fun
 
+## Run locally
 
+Please ensure you have curl and curllib installed on your machine.
+Also install dependencies using: `pip install -r requirements.txt`
+
+Start using `python monitor.py`
+
+## Run as container
+
+Build the container using Dockerfile
 
