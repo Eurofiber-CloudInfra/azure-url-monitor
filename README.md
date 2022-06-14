@@ -19,6 +19,7 @@ Nice to have:
 - [ ] Automatically create Azure Monitoring Alerts for each test
 - [ ] Fun
 
+
 ## Run locally
 
 Please ensure you have curl and curllib installed on your machine.

@@ -6,7 +6,7 @@ The availability test results are stored in the LAW table **AppAvailabilityResul
 
 ## Example Test Outputs
 
-The follwing results were generated from tests configured in the Application Insight interface.
+The following results were generated from tests configured in the Application Insight interface.
 
 ### Valid Test
 
@@ -65,4 +65,16 @@ The follwing results were generated from tests configured in the Application Ins
 | DurationMs | 500                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | Properties: |  ``` { "WebtestLocationId": "emea-ch-zrh-edge", "FullTestResultAvailable": "false", "SourceId": "sid://040d848c-dbb1-4241-9c04-e60fd460e791.visualstudio.com/applications/gvb-mss-appinisghts/features/test1-gvb-mss-appinisghts/locations/emea-ch-zrh-edge", "_MS.altIds": "a17bfb3f153ac0c8,88c010b643af4f41","WebtestArmResourceName":"test1-gvb-mss-appinisghts","SyntheticMonitorId":"default_test1-gvb-mss-appinisghts_emea-ch-zrh-edge"} ``` |
 
+# Proposed Monitor Output
+
+The monitor output should be as much in line with the App Insights internal tests output. As the `Properties` field content is not really relevant for custom monitors we could store additional test/result data, proposal included in table below.   
+
+| Field      | Value                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Name       | <info.name>-<item.name> (from Postman collection definition)                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| Success    | `true/false`  Same logic as App Insights internal tests                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| Messages   | Handle content equally as App Insights internal tests                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| Location   | container ip address / resource id ?                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| DurationMs | 500                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| Properties: |  ``` { "url": <url>, "status_code": <response.status_code> ? } ``` |
 
