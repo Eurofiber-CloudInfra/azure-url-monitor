@@ -127,3 +127,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# drawio backup files 
+*.bkp
+
+# Mac
+.DS_Store
