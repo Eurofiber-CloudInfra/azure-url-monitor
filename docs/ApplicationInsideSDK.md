@@ -21,7 +21,7 @@ success = True
 custom_properties = { 'url': 'https://example.com', 'status_code': 200, 'reason': 'reason why test failed'}
 
 # send results
-tc.track_availability( name, duration_ms, success, location , properties = custom_properties)
+tc.track_availability( name, duration_ms, success, location, properties = custom_properties )
 tc.flush()
 
 ```
