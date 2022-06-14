@@ -19,7 +19,6 @@ Nice to have:
 - [ ] Automatically create Azure Monitoring Alerts for each test
 - [ ] Fun
 
-
 ## Run locally
 
 Please ensure you have curl and curllib installed on your machine.
@@ -30,4 +29,8 @@ Start using `python monitor.py`
 ## Run as container
 
 Build the container using Dockerfile
+
+## Azure Deployment Scenario For Private Endpoint Monitoring
+
+![monitor-private-endpoints-azure.drawio](docs/monitor-private-endpoints-azure.drawio.svg)
 
