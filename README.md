@@ -6,7 +6,7 @@ Goals:
 - [ ] Can run quickly as cron job
 - [ ] Measurements in nanoseconds
 - [ ] Support of multiple tests in parallel
-- [ ] Results should be stored in the Azure Log Analytics Workspace
+- [ ] Results should be stored in Application Insights using [AppAvailabilityResults](docs/ApplicationInsightsData.md) schema
 - [ ] Can run on a VM and as Docker container
 - [ ] Tests should be defined in Postman
 - [ ] Retrieve certificate expiration date and store this
@@ -16,6 +16,7 @@ Nice to have:
 - [ ] A cool name
 - [ ] Support for Kubernetes
 - [ ] Cloud-init setup ready to roll
+- [ ] Automatically create Azure Monitoring Alerts for each test
 - [ ] Fun
 
 ## Run locally
