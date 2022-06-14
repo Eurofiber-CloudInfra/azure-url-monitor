@@ -1,6 +1,6 @@
 # Application Insights Availability SDK
 
-Availability Test data can be shipped to Application Insights using Python and the [Application Insights SDK](https://shipit.dev/python-appinsights/)index.html)
+Availability Test data can be shipped to Application Insights using Python and the [Application Insights SDK](https://shipit.dev/python-appinsights/)
 
 Example
 
