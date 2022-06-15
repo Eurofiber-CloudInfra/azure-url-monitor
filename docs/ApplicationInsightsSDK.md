@@ -7,7 +7,7 @@ Example
 ```
 from applicationinsights import TelemetryClient
 
-app_insights_instrumentation_key = '0ca425c9-6e7a-4abf-8849-b9fc5e1efcde'
+app_insights_instrumentation_key = '<GUID>'
 
 tc = TelemetryClient(app_insights_instrumentation_key)
 
