@@ -4,6 +4,8 @@ Test results are stored in the Log Analytics Workspace attached to the Applicati
 
 The availability test results are stored in the LAW table **AppAvailabilityResults**. Schema can be found [here](https://docs.microsoft.com/en-us/azure/azure-monitor/reference/tables/availabilityresults)
 
+There is slight delay (1-2 minutes) between the moment the test result is visible in the Application Insights interface and when it is available in the attached Log Analytics Workspace.
+
 ## Example Test Outputs
 
 The following results were generated from tests configured in the Application Insight interface.
