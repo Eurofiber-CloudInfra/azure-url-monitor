@@ -2,7 +2,7 @@
 
 Test results are stored in the Log Analytics Workspace attached to the Application Insights instance. The Tables that are visible from the Application Inside interface are different when viewed in the attached Log Analytics interface. Differences explained [here](https://docs.microsoft.com/en-us/azure/azure-monitor/app/convert-classic-resource#table-structure)
 
-The availability test results are stored in the LAW table **AppAvailabilityResults**. Schema can be found [here](https://docs.microsoft.com/en-us/azure/azure-monitor/app/convert-classic-resource#appavailabilityresults)
+The availability test results are stored in the LAW table **AppAvailabilityResults**. Schema can be found [here](https://docs.microsoft.com/en-us/azure/azure-monitor/reference/tables/availabilityresults)
 
 ## Example Test Outputs
 
