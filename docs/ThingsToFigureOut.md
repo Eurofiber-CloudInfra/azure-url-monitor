@@ -1,5 +1,5 @@
 
-# Where to store valid status codes
+# Where to store valid status codes?
 
 - By default expect 200 and for additional valid status codes rely on Postman Test configured with the request?
 - Would it be possible run  simple javascript tests from the Postman Collection export /  use `newman`?
@@ -41,5 +41,8 @@ Example config
 
 ```
 
+# Where to store container application logs?
 
+- An Azure Container Instances deployment allows to [specify](https://docs.microsoft.com/en-us/azure/container-instances/container-instances-log-analytics) a Log Analytics Workspace for logging 
+- Alternatively the logs could also be sound to Application Insights using [`track_trace` method ](https://shipit.dev/python-appinsights/applicationinsights.html#applicationinsights.TelemetryClient.track_trace) from the SDK since we already have the instrumentation key
 
