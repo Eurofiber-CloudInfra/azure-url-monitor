@@ -1,0 +1,122 @@
+{
+	"info": {
+		"_postman_id": "36ba61d7-7b6a-4f23-a209-dce6edae76d2",
+		"name": "Sample Postman Collection",
+		"description": "A sample collection to demonstrate collections as a set of related requests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "lvl1",
+			"item": [
+				{
+					"name": "lvl11",
+					"item": [
+						{
+							"name": "A simple GET request",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('expect response be 200', function () {",
+											"    pm.response.to.be.ok",
+											"})",
+											"pm.test('expect response json contain args', function () {",
+											"    pm.expect(pm.response.json().args).to.have.property('source')",
+											"      .and.equal('newman-sample-github-collection')",
+											"})",
+											"pm.test('expect response to be not 200', function() {",
+											"    pm.response.to.be.notFound",
+											"})"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://postman-echo.com:443/get?source=newman-sample-github-collection",
+									"protocol": "https",
+									"host": [
+										"postman-echo",
+										"com"
+									],
+									"port": "443",
+									"path": [
+										"get"
+									],
+									"query": [
+										{
+											"key": "source",
+											"value": "newman-sample-github-collection"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "A simple POST request",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "text/plain"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "Duis posuere augue vel cursus pharetra. In luctus a ex nec pretium..."
+						},
+						"url": {
+							"raw": "https://postman-echo.com/post",
+							"protocol": "https",
+							"host": [
+								"postman-echo",
+								"com"
+							],
+							"path": [
+								"post"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "A simple POST request with JSON body",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"text\":\"Duis posuere augue vel cursus pharetra. In luctus a ex nec pretium...\"}"
+				},
+				"url": {
+					"raw": "https://postman-echo.com/post",
+					"protocol": "https",
+					"host": [
+						"postman-echo",
+						"com"
+					],
+					"path": [
+						"post"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
