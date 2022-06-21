@@ -42,7 +42,7 @@ class RC(IntEnum):
 @dataclasses.dataclass
 class pm_request_url:
     host: list = dataclasses.field(default_factory=list)
-    protocol: str = "unknown"
+    protocol: str = None
     port: str = None
     raw: str = dataclasses.field(default_factory=str)
     query: list = dataclasses.field(default_factory=list)
@@ -53,10 +53,9 @@ class pm_request_url:
     hostinfo_hashed: str = None
 
     def __post_init__(self):
-        if not self.port and self.protocol.lower() == "https":
-            self.port = "443"
+        # try parsing url data
         if len(self.raw) > 0:
-            self.url_parsed = URL(self.raw).with_components(port=self.port)
+            self.url_parsed = URL(self.raw)
         elif len(self.host) > 0:
             url_path = "/".join(self.path)
             url_query = "&".join(
@@ -73,7 +72,20 @@ class pm_request_url:
                 query=f"?{url_query}" if len(url_query) > 0 else "",
             )
             self.url_parsed = URL(reconstructed_url)
+
         if self.url_parsed:
+
+            # try populating fields from parsed url if missing
+            if not self.protocol:
+                self.protocol = self.url_parsed.scheme
+            if not self.port:
+                self.port = self.url_parsed.port
+            if not self.port and self.protocol.lower() == "https":
+                self.port = "443"
+
+            # adjust parsed url with new components
+            self.url_parsed = self.url_parsed.with_components(port=self.port)
+
             # get a unique enough hash from parsed url
             self.url_hashed = hashlib.sha1(
                 self.url_parsed.as_uri().encode("utf-8")
@@ -450,14 +462,16 @@ def process_pm_collection_report(data: dict, report_error_rc: int):
 
 def pm_collection_extract_urls(data: dict) -> list:
     collection = list()
-
-    for item in data.get("item", []):
-        if "item" in item:
+    if "item" in data:
+        for item in data.get("item", []):
             collection.extend(pm_collection_extract_urls(item))
-    else:
-        url_doc = pm_request_url(**item.get("request").get("url"))
+    elif "request" in data:
+        request_url = data.get("request").get("url")
+        if isinstance(request_url, dict):
+            url_doc = pm_request_url(**item.get("request").get("url"))
+        elif isinstance(request_url, str):
+            url_doc = pm_request_url(**dict(raw=request_url))
         collection.append(url_doc)
-
     return collection
 
 
