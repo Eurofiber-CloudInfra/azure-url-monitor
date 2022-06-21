@@ -1,4 +1,4 @@
-README.md
-requirements.txt
-LICENSE
-Dockerfile
+*
+!*.py
+!Pipfile*
+!docker/*.sh
