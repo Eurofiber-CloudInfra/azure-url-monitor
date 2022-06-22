@@ -11,6 +11,8 @@ import tempfile
 import logging
 import ssl
 import re
+import socket
+import ipaddress
 import crl_checker
 
 from enum import IntEnum
@@ -478,9 +480,8 @@ def pm_collection_extract_urls(data: dict) -> list:
 
 
 def is_self_signed_cert(cert: x509.Certificate) -> bool:
-    """
-    Using heuristic check for self-signed certificates described in:
-    https://www.rfc-editor.org/rfc/rfc3280#section-4.2.1.1
+    """Using heuristic check for self-signed certificates.
+    Details described in: https://www.rfc-editor.org/rfc/rfc3280#section-4.2.1.1
     Implementation hint reference:
     https://security.stackexchange.com/questions/93162/how-to-know-if-certificate-is-self-signed
     """
@@ -516,6 +517,39 @@ def retrieve_server_certificates(urls: list) -> dict:
             host_cert=host_cert,
         )
     return results
+
+
+def estimate_location(auto_location_test_hostinfo: str) -> str:
+    """Returns an IP-Address used to communicate to external endpoints."""
+
+    logging.info(
+        f"Determining location from test connection to [{auto_location_test_hostinfo}]"
+    )
+    host_info_parts = auto_location_test_hostinfo.split(":")
+    host, port, *_ = tuple(host_info_parts)
+    proto = "TCP"
+    if len(host_info_parts) > 2:
+        proto = host_info_parts[2].upper()
+    port = int(port)
+    ip = ipaddress.ip_address(host)
+
+    if isinstance(ip, ipaddress.IPv4Address):
+        sock_fam = socket.AF_INET
+    elif isinstance(ip, ipaddress.IPv6Address):
+        sock_fam = socket.AF_INET6
+    else:
+        raise ValueError("Require valid IP address in test hostinfo.")
+
+    if proto in ["UDP", "TCP"]:
+        sock_proto = socket.IPPROTO_UDP if proto == "UDP" else socket.IPPROTO_TCP
+        sock_type = socket.SOCK_DGRAM if proto == "UDP" else socket.SOCK_STREAM
+    else:
+        raise ValueError("Required protocol not found in test hostinfo.")
+
+    s = socket.socket(sock_fam, sock_type, sock_proto)
+    s.connect((str(ip), port))
+    socket_source_ip = ipaddress.ip_address(s.getsockname()[0])
+    return str(socket_source_ip)
 
 
 def sanitize_appinsights(payload: dict) -> dict:
@@ -577,9 +611,9 @@ def urlcheck(
     ),
     location: str = typer.Option(default=None, envvar="LOCATION"),
     auto_location_test_hostinfo: str = typer.Option(
-        default="127.0.0.1:53", envvar="AUTO_LOCATION_TEST_HOSTINFO"
+        default="1.1.1.1:53:UDP", envvar="AUTO_LOCATION_TEST_HOSTINFO"
     ),
-    verbosity: int = typer.Option(0, "-v", count=True),
+    verbosity: int = typer.Option(None, "-v", count=True),
 ):
     call_args = locals()
 
@@ -593,7 +627,7 @@ def urlcheck(
     elif verbosity >= 3:
         logger.setLevel(logging.DEBUG)
 
-    typer.echo(f"Starting test run for collection url: [{pm_collection_url}]")
+    logging.info(f"Starting test run for collection url: [{pm_collection_url}]")
     logging.debug(f"Startup state: {call_args}")
 
     data = load_pm_collection(pm_collection_url)
@@ -623,11 +657,15 @@ def urlcheck(
             )
         test_report_doc.validate_test_report()
 
+    if not location:
+        location = estimate_location(auto_location_test_hostinfo)
+
     # publish report data
     appinsights_client = TelemetryClient(ai_instrumentation_key)
     publish_in_appinsights(
         data=pm_report_data, tc=appinsights_client, location=location
     )
+    logging.info(f"Reached end of run for collection url: [{pm_collection_url}]")
 
 
 if __name__ == "__main__":
