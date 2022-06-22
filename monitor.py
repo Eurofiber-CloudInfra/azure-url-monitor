@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 
-from enum import IntEnum
 import hashlib
-from typing import Any, Tuple
-from pathlib import Path
 import dataclasses
 import typer
 import requests
@@ -13,14 +10,18 @@ import shutil
 import tempfile
 import logging
 import ssl
-from datetime import datetime
-from cryptography import x509
+import re
 import crl_checker
 
-from applicationinsights import TelemetryClient
-
-from urlpath import URL
+from enum import IntEnum
+from typing import Any, Tuple
+from pathlib import Path
+from datetime import datetime
 from pprint import pprint as pp
+
+from cryptography import x509
+from applicationinsights import TelemetryClient
+from urlpath import URL
 
 app = typer.Typer()
 testcmd = "newman"
@@ -390,7 +391,8 @@ def patch_report_collection_item_data(
         # we are in a subfolder structure of the collection data
         current_level_name = "[{0}]".format(collection_data.get("name", "/"))
     else:
-        current_level_name = "root"
+        # this is likely root level of the collection
+        current_level_name = ""
     if parent_level_name:
         current_level_name = f"{parent_level_name} / {current_level_name}"
     for coll_item in collection_data.get("item"):
@@ -516,6 +518,25 @@ def retrieve_server_certificates(urls: list) -> dict:
     return results
 
 
+def sanitize_appinsights(payload: dict) -> dict:
+    """
+    Mitigate AppInsights submission restrictions:
+    name: 1-64, 0-1A-Za-z, hyphen, space, needs to start with char
+    """
+    name = str(payload.get("name"))
+    name = name.replace("/", "--")
+    name = re.sub(r"(?:[^a-zA-Z\d\ \-])", " ", name)
+    name = re.sub(r"(\ )+", r"\1", name)
+    name = re.sub(r"(\-\-)+", r"\1", name)
+    name = name.strip()
+    if re.match(r"^[^a-zA-Z]", name):
+        name = f"C-{name}"
+    if len(name) > 64:
+        name = f"{name[:-3]}..."
+    payload.update(dict(name=name))
+    return payload
+
+
 def publish_in_appinsights(data: dict, tc: TelemetryClient, location: str = None):
     for report_doc in data.values():
         logging.debug(f"Preparing payload for document id: [{report_doc.id}]")
@@ -528,6 +549,7 @@ def publish_in_appinsights(data: dict, tc: TelemetryClient, location: str = None
             message=" ".join(report_doc.test_messages),
             properties=report_doc.get_result_properties(),
         )
+        payload = sanitize_appinsights(payload)
         logging.debug(f"Payload of document id [{report_doc.id}] follows:")
         logging.debug(str(payload))
         # send results
@@ -554,6 +576,9 @@ def urlcheck(
         default=14, envvar="CERTIFICATE_EXPIRATION_GRACETIME_DAYS"
     ),
     location: str = typer.Option(default=None, envvar="LOCATION"),
+    auto_location_test_hostinfo: str = typer.Option(
+        default="127.0.0.1:53", envvar="AUTO_LOCATION_TEST_HOSTINFO"
+    ),
     verbosity: int = typer.Option(0, "-v", count=True),
 ):
     call_args = locals()
@@ -597,14 +622,12 @@ def urlcheck(
                 expiration_gracetime_days=certificate_expiration_gracetime_days,
             )
         test_report_doc.validate_test_report()
-        pass
 
     # publish report data
     appinsights_client = TelemetryClient(ai_instrumentation_key)
     publish_in_appinsights(
         data=pm_report_data, tc=appinsights_client, location=location
     )
-    pass
 
 
 if __name__ == "__main__":
