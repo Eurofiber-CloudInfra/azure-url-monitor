@@ -13,6 +13,8 @@ resource ai 'microsoft.insights/components@2020-02-02' = {
     Application_Type: 'web'
     RetentionInDays: 30
     WorkspaceResourceId: log.id
+    Flow_Type: 'Bluefield'
+    Request_Source: 'Custom'
     IngestionMode: 'LogAnalytics'
     publicNetworkAccessForIngestion: 'Enabled'
     publicNetworkAccessForQuery: 'Enabled'

@@ -1,7 +1,7 @@
 targetScope = 'subscription'
 
 param location string = deployment().location
-param name_base string = 'urlmonitor-tst-euwe-001'
+param name_base string = 'urlmonitor-tst-euwe-005'
 param tags object = {
   'owner': 'dennis'
 }
