@@ -518,23 +518,22 @@ def retrieve_server_certificates(urls: list) -> dict:
 
 def publish_in_appinsights(data: dict, tc: TelemetryClient, location: str = None):
     for report_doc in data.values():
+        logging.debug(f"Preparing payload for document id: [{report_doc.id}]")
         tc.context.operation.id = report_doc.id
-        name = report_doc.name
-        location = location
-        duration_ms = report_doc.response.responseTime if report_doc.response else 0
-        success = not report_doc.test_failed
-        message = " ".join(report_doc.test_messages)
-        custom_properties = report_doc.get_result_properties()
-        # send results
-        tc.track_availability(
-            name,
-            duration_ms,
-            success,
-            location,
-            message=message,
-            properties=custom_properties,
+        payload = dict(
+            name=report_doc.name,
+            duration=report_doc.response.responseTime if report_doc.response else 0,
+            success=not report_doc.test_failed,
+            run_location=location,
+            message=" ".join(report_doc.test_messages),
+            properties=report_doc.get_result_properties(),
         )
+        logging.debug(f"Payload of document id [{report_doc.id}] follows:")
+        logging.debug(str(payload))
+        # send results
+        tc.track_availability(**payload)
         tc.flush()
+        logging.info(f"Report for document id [{report_doc.id}] submitted.")
     pass
 
 
@@ -555,7 +554,23 @@ def urlcheck(
         default=14, envvar="CERTIFICATE_EXPIRATION_GRACETIME_DAYS"
     ),
     location: str = typer.Option(default=None, envvar="LOCATION"),
+    verbosity: int = typer.Option(0, "-v", count=True),
 ):
+    call_args = locals()
+
+    logger = logging.getLogger()
+    if not verbosity:
+        logger.setLevel(logging.ERROR)
+    elif verbosity == 1:
+        logger.setLevel(logging.WARNING)
+    elif verbosity == 2:
+        logger.setLevel(logging.INFO)
+    elif verbosity >= 3:
+        logger.setLevel(logging.DEBUG)
+
+    typer.echo(f"Starting test run for collection url: [{pm_collection_url}]")
+    logging.debug(f"Startup state: {call_args}")
+
     data = load_pm_collection(pm_collection_url)
     pm_test_results, error_rc, _ = run_pm_collection_test(data)
     pm_report_data = process_pm_collection_report(pm_test_results, error_rc)
