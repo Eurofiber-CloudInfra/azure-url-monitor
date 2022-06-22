@@ -55,6 +55,9 @@ Start using the main script:
 ## Run as container
 
 Build the container using Dockerfile
+```
+docker build -t urlmonitor:latest --pull -f docker/Dockerfile .
+```
 
 ## Azure Deployment Scenario For Private Endpoint Monitoring
 
