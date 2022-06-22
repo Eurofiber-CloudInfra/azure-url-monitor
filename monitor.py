@@ -346,18 +346,37 @@ def load_pm_collection(ref: str) -> dict:
     return ref_data
 
 
-def run_pm_collection_test(data: dict) -> Tuple:
+def run_pm_collection_test(
+    data: dict,
+    nm_timeout_collection: int = None,
+    nm_timeout_request: int = None,
+    nm_timeout_script: int = None,
+    py_subproc_timeout: int = None,
+) -> Tuple:
     if not shutil.which(testcmd):
         raise Exception(f"Could not find executable ({testcmd}) in $PATH")
     report_data = {}
     error_rc = 0
     error_raw = None
+    # customize sub-command options
+    timeout_overrides = ""
+    if nm_timeout_collection:
+        timeout_overrides = f"{timeout_overrides} --timeout {nm_timeout_collection}"
+        py_subproc_timeout = round((nm_timeout_collection / 1000) + 60)
+    if nm_timeout_request:
+        timeout_overrides = (
+            f"{timeout_overrides} --timeout-request {nm_timeout_request}"
+        )
+    if nm_timeout_script:
+        timeout_overrides = f"{timeout_overrides} --timeout-script {nm_timeout_script}"
+    timeout_overrides = timeout_overrides.strip()
+
     with tempfile.TemporaryDirectory() as tempdir:
         data_input_file = Path(f"{tempdir}/input_collection.json")
         data_output_file = Path(f"{tempdir}/output_report.json")
         with data_input_file.open(mode="w") as collection_fp:
             json.dump(data, collection_fp)
-        cmd_base = f"{testcmd} {testcmd_opts} --reporter-json-export {data_output_file.absolute()} {data_input_file.absolute()}".split()
+        cmd_base = f"{testcmd} {testcmd_opts} --reporter-json-export {data_output_file.absolute()} {timeout_overrides} {data_input_file.absolute()}".split()
         proc = subprocess.run(
             cmd_base,
             shell=False,
@@ -365,6 +384,7 @@ def run_pm_collection_test(data: dict) -> Tuple:
             stdout=subprocess.PIPE,
             encoding="utf-8",
             check=False,
+            timeout=py_subproc_timeout,
         )
         if proc.returncode > 0:
             logging.debug("handle test command error codes")
@@ -597,6 +617,11 @@ def publish_in_appinsights(data: dict, tc: TelemetryClient, location: str = None
 def urlcheck(
     ai_instrumentation_key: str = typer.Option(..., envvar="AI_INSTRUMENTATION_KEY"),
     pm_collection_url: str = typer.Option(..., envvar="PM_COLLECTION_URL"),
+    nm_timeout_collection: int = typer.Option(
+        default=300000, envvar="NM_TIMEOUT_COLLECTION"
+    ),
+    nm_timeout_request: int = typer.Option(default=5000, envvar="NM_TIMEOUT_REQUEST"),
+    nm_timeout_script: int = typer.Option(default=5000, envvar="NM_TIMEOUT_SCRIPT"),
     certificate_validation_check: bool = typer.Option(
         default=True, envvar="CERTIFICATE_VALIDATION_CHECK"
     ),
@@ -631,7 +656,7 @@ def urlcheck(
     logging.debug(f"Startup state: {call_args}")
 
     data = load_pm_collection(pm_collection_url)
-    pm_test_results, error_rc, _ = run_pm_collection_test(data)
+    pm_test_results, error_rc, _ = run_pm_collection_test(data, nm_timeout_collection=nm_timeout_collection, nm_timeout_request=nm_timeout_request, nm_timeout_script=nm_timeout_script)
     pm_report_data = process_pm_collection_report(pm_test_results, error_rc)
 
     if certificate_validation_check:
