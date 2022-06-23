@@ -30,6 +30,7 @@ RUN set -ex \
   && chown runtime /runtime
 
 ENV \
+  DEBUG=NO \
   AI_INSTRUMENTATION_KEY= \
   PM_COLLECTION_URL= \
   NM_TIMEOUT_COLLECTION= \
