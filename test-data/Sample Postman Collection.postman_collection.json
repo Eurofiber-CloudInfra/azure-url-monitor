@@ -105,10 +105,11 @@
 					"raw": "{\"text\":\"Duis posuere augue vel cursus pharetra. In luctus a ex nec pretium...\"}"
 				},
 				"url": {
-					"raw": "https://postman-echo.com/post",
+					"raw": "https://nope.google.com/post",
 					"protocol": "https",
 					"host": [
-						"postman-echo",
+						"nope",
+						"google",
 						"com"
 					],
 					"path": [
