@@ -732,7 +732,7 @@ def urlcheck(
                 check_expiration=certificate_check_expiration,
                 expiration_gracetime_days=certificate_expiration_gracetime_days,
             )
-        test_report_doc.validate_test_report()
+        test_report_doc.validate_test_report(include_ssl_test_results=certificate_validation_check)
 
     if not location:
         location = estimate_location(auto_location_test_hostinfo)
