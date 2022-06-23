@@ -27,7 +27,7 @@ from urlpath import URL
 
 app = typer.Typer()
 testcmd = "newman"
-testcmd_opts = "run --reporters json"
+testcmd_opts = "run --insecure --reporters json"
 
 # logging setup
 format = "%(asctime)s - %(levelname)s - %(message)s"
@@ -202,30 +202,38 @@ class pm_failure_result:
 
 @dataclasses.dataclass
 class sslcert_result_document:
-    url: pm_request_url
-    host_cert: x509.Certificate
+    url: pm_request_url = None
+    host_cert: x509.Certificate = None
     is_self_signed: bool = False
     is_revoked: bool = False
     crl_verification_failures: list = dataclasses.field(default_factory=list)
     revoked_msg: Any = None
     today_until_expired_days: int = 0
     valid_until_today_days: int = 0
+    error_type: str = None
+    error_code: int = 0
+    error_msg_raw: str = None
 
     def __post_init__(self):
-        dt_today = datetime.today()
-        self.is_self_signed = is_self_signed_cert(self.host_cert)
-        self.today_until_expired_days = (self.host_cert.not_valid_after - dt_today).days
-        self.valid_until_today_days = (dt_today - self.host_cert.not_valid_before).days
-        if not self.is_self_signed:
-            try:
-                crl_checker.check_revoked_crypto_cert(self.host_cert)
-            except crl_checker.Revoked as revoked:
-                self.is_revoked = True
-                self.revoked_msg = revoked
-            except crl_checker.Error as other:
-                self.crl_verification_failures.append(other)
-            else:
-                self.is_revoked = False
+        if not self.error_type and self.error_code == 0:
+            dt_today = datetime.today()
+            self.today_until_expired_days = (
+                self.host_cert.not_valid_after - dt_today
+            ).days
+            self.valid_until_today_days = (
+                dt_today - self.host_cert.not_valid_before
+            ).days
+            self.is_self_signed = is_self_signed_cert(self.host_cert)
+            if not self.is_self_signed:
+                try:
+                    crl_checker.check_revoked_crypto_cert(self.host_cert)
+                except crl_checker.Revoked as revoked:
+                    self.is_revoked = True
+                    self.revoked_msg = revoked
+                except crl_checker.Error as other:
+                    self.crl_verification_failures.append(other)
+                else:
+                    self.is_revoked = False
 
 
 @dataclasses.dataclass
@@ -233,7 +241,8 @@ class check_result_document(pm_item):
     assertions: list = dataclasses.field(default_factory=list)
     failure: pm_failure_result = None
     ssl: sslcert_result_document = None
-    test_failed: bool = False
+    test_ssl_success: bool = False
+    test_success: bool = False
     test_messages: list = dataclasses.field(default_factory=list)
 
     def get_result_properties(self) -> dict:
@@ -250,7 +259,7 @@ class check_result_document(pm_item):
                 rsp_size=self.response.responseSize,
             )
             output.update(rsp_output)
-        if self.ssl:
+        if self.ssl and self.ssl.host_cert:
             # extend output with ssl info
             ssl_output = dict(
                 ssl_issuer=str(self.ssl.host_cert.issuer),
@@ -259,9 +268,6 @@ class check_result_document(pm_item):
                 ssl_expired_date=self.ssl.host_cert.not_valid_after.isoformat(),
             )
             output.update(ssl_output)
-        # if no failed test
-        if not self.test_failed:
-            self.test_messages.append("Passed")
         # output mods for appinsights
         for k in output:
             if isinstance(output.get(k), dict) or isinstance(output.get(k), list):
@@ -274,37 +280,62 @@ class check_result_document(pm_item):
         check_expiration: bool = True,
         expiration_gracetime_days: int = 14,
     ) -> bool:
+        logging.debug("Validating certificate test data.")
+        ssl_test_failed = False
         if not self.ssl:
-            self.test_failed = self.test_failed or True
+            logging.debug("No SSL data found.")
             self.test_messages.append("No SSL data found where one was expected.")
+            ssl_test_failed |= True
+        elif self.ssl.error_type or self.ssl.error_code and not self.ssl.host_cert:
+            logging.debug("Check SSL routine underlay errors.")
+            error_msg = f"Internal error during SSL cert retrieval. Type: [{self.ssl.error_type}] | Code: [{self.ssl.error_code}] | Raw: [{self.ssl.error_msg_raw}]"
+            self.test_messages.append(error_msg)
+            ssl_test_failed |= True
         elif self.ssl.is_self_signed and self_signed_invalid:
-            self.test_failed = self.test_failed or True
+            logging.debug("Check SSL cert self-signed and therefor invalid.")
             self.test_messages.append(
                 "Self-Signed certificate detected where valid certification is required."
             )
+            ssl_test_failed |= True
         elif self.ssl.is_revoked:
-            self.test_failed = self.test_failed or True
+            logging.debug("Check SSL cert revoked.")
             self.test_messages.append("Revoked certificate detected.")
-        elif self.ssl.today_until_expired_days < 0:
-            self.test_failed = self.test_failed or True
+            ssl_test_failed |= True
+        elif check_expiration and self.ssl.today_until_expired_days < 0:
+            logging.debug("Check SSL cert already expired.")
             self.test_messages.append(
                 f"Certificate expired [{self.ssl.host_cert.not_valid_after.isoformat()}]"
             )
+            ssl_test_failed |= True
         elif (
             check_expiration
             and self.ssl.today_until_expired_days < expiration_gracetime_days
         ):
-            self.test_failed = self.test_failed or True
+            logging.debug(
+                f"Check SSL cert expiry shorter than grace time [{expiration_gracetime_days}] days."
+            )
             self.test_messages.append(
                 f"Certificate expiry [{self.ssl.host_cert.not_valid_after.isoformat()}] within {expiration_gracetime_days} days"
             )
-        return self.test_failed
+            ssl_test_failed |= True
 
-    def validate_test_report(self) -> bool:
+        logging.debug("All SSL cert related checks finished.")
+        self.test_ssl_success = not ssl_test_failed
+        return self.test_ssl_success
+
+    def validate_test_report(self, include_ssl_test_results: bool = True) -> bool:
+        logging.debug("Validating test report data.")
         if self.failure:
-            self.test_failed = self.test_failed or True
+            self.test_success = False
             self.test_messages.append(str(self.failure))
-        return self.test_failed
+        else:
+            self.test_success = True
+        if include_ssl_test_results:
+            self.test_success &= self.test_ssl_success
+
+        if self.test_success:
+            self.test_messages.append("Passed")
+        return self.test_success
 
 
 def load_pm_collection_url(url: str, timeout: Any = 5) -> dict:
@@ -355,7 +386,7 @@ def run_pm_collection_test(
 ) -> Tuple:
     if not shutil.which(testcmd):
         raise Exception(f"Could not find executable ({testcmd}) in $PATH")
-    report_data = {}
+    report_data = None
     error_rc = 0
     error_raw = None
     # customize sub-command options
@@ -390,11 +421,12 @@ def run_pm_collection_test(
             logging.debug("handle test command error codes")
             error_rc = proc.returncode
             error_raw = "{0}\n{1}".format(proc.stderr, proc.stdout)
-            if not data_output_file.is_file:
+            if not data_output_file.is_file():
                 logging.critical(f"RC:{error_rc} | RAW:{error_raw}")
-                raise ValueError("Test command failed without output report!")
-        with data_output_file.open(mode="r") as report_fp:
-            report_data = json.load(report_fp)
+                raise RuntimeError("Test command failed without output report!")
+        if data_output_file.is_file():
+            with data_output_file.open(mode="r") as report_fp:
+                report_data = json.load(report_fp)
     return (report_data, error_rc, error_raw)
 
 
@@ -491,8 +523,10 @@ def pm_collection_extract_urls(data: dict) -> list:
             collection.extend(pm_collection_extract_urls(item))
     elif "request" in data:
         request_url = data.get("request").get("url")
+        if not request_url:
+            return collection
         if isinstance(request_url, dict):
-            url_doc = pm_request_url(**item.get("request").get("url"))
+            url_doc = pm_request_url(**data.get("request").get("url"))
         elif isinstance(request_url, str):
             url_doc = pm_request_url(**dict(raw=request_url))
         collection.append(url_doc)
@@ -523,19 +557,32 @@ def is_self_signed_cert(cert: x509.Certificate) -> bool:
         raise typer.Exit(RC.OTHER)
 
 
-def retrieve_server_certificates(urls: list) -> dict:
+def retrieve_server_certificates(urls: list, ssl_timeout: float = 5.0) -> dict:
     results = {}
     for url in urls:
         if url.hostinfo_hashed in results:
             continue
         # retrieve host cert without verification
         address = (url.url_parsed.hostname, url.url_parsed.port)
-        host_pem = ssl.get_server_certificate(address)
-        host_cert = x509.load_pem_x509_certificate(host_pem.encode("utf-8"))
-        results[url.hostinfo_hashed] = sslcert_result_document(
-            url=url,
-            host_cert=host_cert,
-        )
+        try:
+            host_pem = ssl.get_server_certificate(address, timeout=ssl_timeout)
+            host_cert = x509.load_pem_x509_certificate(host_pem.encode("utf-8"))
+            results[url.hostinfo_hashed] = sslcert_result_document(
+                url=url,
+                host_cert=host_cert,
+            )
+        except OSError as ex:
+            results[url.hostinfo_hashed] = sslcert_result_document(
+                error_code=int(ex.errno) if ex.errno else RC.BASIC,
+                error_type=str(type(ex).__name__),
+                error_msg_raw=ex.strerror,
+            )
+        except Exception as ex:
+            results[url.hostinfo_hashed] = sslcert_result_document(
+                error_code=RC.OTHER,
+                error_type=str(type(ex).__name__),
+                error_msg_raw=str(ex),
+            )
     return results
 
 
@@ -598,7 +645,7 @@ def publish_in_appinsights(data: dict, tc: TelemetryClient, location: str = None
         payload = dict(
             name=report_doc.name,
             duration=report_doc.response.responseTime if report_doc.response else 0,
-            success=not report_doc.test_failed,
+            success=report_doc.test_success,
             run_location=location,
             message=" ".join(report_doc.test_messages),
             properties=report_doc.get_result_properties(),
@@ -656,7 +703,12 @@ def urlcheck(
     logging.debug(f"Startup state: {call_args}")
 
     data = load_pm_collection(pm_collection_url)
-    pm_test_results, error_rc, _ = run_pm_collection_test(data, nm_timeout_collection=nm_timeout_collection, nm_timeout_request=nm_timeout_request, nm_timeout_script=nm_timeout_script)
+    pm_test_results, error_rc, _ = run_pm_collection_test(
+        data,
+        nm_timeout_collection=nm_timeout_collection,
+        nm_timeout_request=nm_timeout_request,
+        nm_timeout_script=nm_timeout_script,
+    )
     pm_report_data = process_pm_collection_report(pm_test_results, error_rc)
 
     if certificate_validation_check:
