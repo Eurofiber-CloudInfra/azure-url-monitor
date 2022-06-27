@@ -1,4 +1,28 @@
 #!/usr/bin/env python3
+"""Test URL endpoints defined within Postman Collections and report to Azure AppInsights.
+
+Copyright 2022 Eurofiber | Cloud Infra
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+"""
+
+__version__ = "0.1.0"
+__author__ = "Alexander Kuemmel <akisys@github>"
+__license__ = "Apache License 2.0"
+
+
+import sys
+assert sys.version_info >= (3, 7)
 
 import hashlib
 import dataclasses
@@ -732,7 +756,9 @@ def urlcheck(
                 check_expiration=certificate_check_expiration,
                 expiration_gracetime_days=certificate_expiration_gracetime_days,
             )
-        test_report_doc.validate_test_report(include_ssl_test_results=certificate_validation_check)
+        test_report_doc.validate_test_report(
+            include_ssl_test_results=certificate_validation_check
+        )
 
     if not location:
         location = estimate_location(auto_location_test_hostinfo)
