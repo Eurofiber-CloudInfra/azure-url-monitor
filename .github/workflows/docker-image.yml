@@ -8,7 +8,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_NAME: 'azure-url-monitor'
 
 jobs:
   build_and_push:
@@ -24,15 +24,9 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GHCR_PAT }}
 
-    # change repo name to lower case
-    - uses: ASzc/change-string-case-action@v2
-      id: image_name
-      with:
-        string: ${{ github.repository }}
-
     - name: Build and Push image
       uses: docker/build-push-action@v2
       with:
         push: true
-        tags: ${{ env.REGISTRY }}/${{ steps.image_name.outputs.lowercase }}:latest
+        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
         file: ./docker/Dockerfile
