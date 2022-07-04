@@ -14,6 +14,7 @@ COPY Pipfile* /provisioning/
 RUN set -ex \
   && pipenv install --system --deploy \
   && npm install -g newman \
+  && apt upgrade \ 
   && apt remove -yq --purge ${BUILD_DEPS} \
   && apt autoremove -yq \
   && apt autoclean -yq \
