@@ -6,9 +6,11 @@ ARG \
 
 RUN set -e \
   && apt update \
-  && apt upgrade -yq \
+  && apt upgrade -yq 
+
+RUN set -e \
   && apt install -yq --no-install-recommends nodejs npm tini \
-  && apt install -yq --no-install-recommends ${BUILD_DEPS} \
+  && apt install -yq --no-install-recommends ${BUILD_DEPS} 
 
 
 WORKDIR /provisioning
