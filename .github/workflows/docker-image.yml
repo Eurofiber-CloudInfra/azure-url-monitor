@@ -25,4 +25,4 @@ jobs:
     - name: Build the Docker image
       run: |
         set -x
-        docker build . --file docker/Dockerfile --tag $IMAGE_NAME${{ github.ref }}
+        docker build . --file docker/Dockerfile --tag $IMAGE_NAME:${{ github.ref }}
