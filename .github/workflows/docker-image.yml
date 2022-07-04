@@ -41,7 +41,7 @@ jobs:
           --cache-from=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest .
 
     - name: Scan image
-      if: $SCAN_IMAGE == 'true'
+      if: ${{ env.SCAN_IMAGE }} == 'true'
       uses: Azure/container-scan@v0
       with:
         image-name:  ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.run_number }}
