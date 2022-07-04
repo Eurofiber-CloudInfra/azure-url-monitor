@@ -20,8 +20,9 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GHCR_PAT }}
     
-    - name: Build the Docker image
     - uses: actions/checkout@v3
+
+    - name: Build the Docker image
       run: |
         set -x
         docker build . --file docker/Dockerfile --tag $IMAGE_NAME${{ github.ref }}
