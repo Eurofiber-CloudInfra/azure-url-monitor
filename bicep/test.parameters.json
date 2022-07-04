@@ -3,13 +3,18 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "tags": {
-      "value": {}
+      "value": {
+        
+      }
     },
     "app_name":{
       "value": "myapp"
     },
     "name_base":{
       "value": "{0}-tst-euno-001"
+    },
+    "postman_collection_url":{
+      "value": "https://www.getpostman.com/collections/caa66e30322537554be0"
     }
   }
 }

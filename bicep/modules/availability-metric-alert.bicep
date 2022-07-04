@@ -1,6 +1,5 @@
 targetScope = 'resourceGroup'
 
-param location string
 param application_insights_id string
 param alert_name string
 @allowed([
