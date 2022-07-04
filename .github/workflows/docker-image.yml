@@ -9,6 +9,7 @@ on:
 env:
   REGISTRY: 'ghcr.io'
   IMAGE_NAME: 'eurofiber-cloudinfra/azure-url-monitor'
+  SCAN_IMAGE: 'false'
 
 jobs:
   build_and_push:
@@ -24,26 +25,41 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GHCR_PAT }}
 
+
+    - name: Pull image for layer caching
+      run: |
+        set -x
+        docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+
     - name: Build image
-      uses: docker/build-push-action@v2
-      with:
-        push: false
-        tags: |
-          ${{ env.IMAGE_NAME }}:${{ github.run_number }}
-        file: ./docker/Dockerfile
+      run: |
+        set -x
+        docker build \
+          -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.run_number }}
+          -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          -f ./docker/Dockerfile
+          -cache-from=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
 
-    - name: Scan image
-      uses: Azure/container-scan@v0
-      with:
-        image-name: ${{ env.IMAGE_NAME }}:${{ github.run_number }}
-        severity-threshold: CRITICAL
-        run-quality-checks: true   
+    # - name: Build image
+    #   uses: docker/build-push-action@v2
+    #   with:
+    #     push: false
+    #     tags:  ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.run_number }}
+    #     file: ./docker/Dockerfile
 
-    - name: Push image
-      uses: docker/build-push-action@v2
-      with:
-        push: true
-        tags: |
-          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.run_number }}
-        file: ./docker/Dockerfile
+    # - name: Scan image
+    #   if: $SCAN_IMAGE == 'true'
+    #   uses: Azure/container-scan@v0
+    #   with:
+    #     image-name:  ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.run_number }}
+    #     severity-threshold: CRITICAL
+    #     run-quality-checks: true   
+
+    # - name: Push image
+    #   uses: docker/build-push-action@v2
+    #   with:
+    #     push: true
+    #     tags: |
+    #       ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+    #       ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.run_number }}
+    #     file: ./docker/Dockerfile
