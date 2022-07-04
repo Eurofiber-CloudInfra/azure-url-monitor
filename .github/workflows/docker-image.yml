@@ -7,7 +7,7 @@ on:
     branches: [ "main" ]
 
 env:
-  IMAGE_NAME: 'ghcr.io/eurofiber-cloudinfra/azure-url-monitor'
+  IMAGE_NAME: 'eurofiber-cloudinfra/azure-url-monitor'
 
 jobs:
   build:
@@ -22,19 +22,10 @@ jobs:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ secrets.GHCR_PAT }}
-    
-    - name: Docker meta
-      id: docker_meta
-      uses: crazy-max/ghaction-docker-meta@v1
-      with:
-        images: $IMAGE_NAME
-        tag-sha: true
-        tag-edge: false
-        tag-latest: true    
 
     - name: Build and Push image
       uses: docker/build-push-action@v2
       with:
         push: true
-        tags: ${{ steps.docker_meta.outputs.lowercase.tags }}
+        tags: ghcr.io/$IMAGE_NAME:latest
         file: ./docker/Dockerfile
