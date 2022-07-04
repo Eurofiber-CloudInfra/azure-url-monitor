@@ -6,15 +6,16 @@ ARG \
 
 RUN set -e \
   && apt update \
+  $& apt upgrade -yq \
   && apt install -yq --no-install-recommends nodejs npm tini \
-  && apt install -yq --no-install-recommends ${BUILD_DEPS}
+  && apt install -yq --no-install-recommends ${BUILD_DEPS} \
+
 
 WORKDIR /provisioning
 COPY Pipfile* /provisioning/
 RUN set -ex \
   && pipenv install --system --deploy \
   && npm install -g newman \
-  && apt upgrade \ 
   && apt remove -yq --purge ${BUILD_DEPS} \
   && apt autoremove -yq \
   && apt autoclean -yq \
