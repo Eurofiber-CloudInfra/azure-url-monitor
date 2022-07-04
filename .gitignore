@@ -128,8 +128,17 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# drawio backup files 
+# drawio backup files
 *.bkp
 
 # Mac
 .DS_Store
+
+# NodeJS dependencies excluded
+node_modules*
+package*.json
+
+# IDE excludes
+.vscode*
+
+

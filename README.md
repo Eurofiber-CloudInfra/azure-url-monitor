@@ -4,13 +4,13 @@ Slightly more advanced version of the URL monitor tool of Azure that stores the 
 
 Goals:
 - [ ] Can run quickly as cron job
-- [ ] Measurements in nanoseconds
 - [ ] Support of multiple tests in parallel
 - [ ] Results should be stored in Application Insights using [AppAvailabilityResults](docs/ApplicationInsightsData.md) schema
 - [ ] Can run on a VM and as Docker container
-- [ ] Tests should be defined in Postman
-- [ ] Retrieve certificate expiration date and store this
+- [x] Tests should be defined in Postman
+- [x] Retrieve certificate expiration date and store this
 - [ ] If the monitor fails sufficient log information should be available to generate an alert
+- [ ] <strike>Measurements in nanoseconds</strike> Note: this was deemed unnecessary
 
 Nice to have:
 - [ ] A cool name
@@ -19,18 +19,50 @@ Nice to have:
 - [ ] Automatically create Azure Monitoring Alerts for each test
 - [ ] Fun
 
+## External dependencies
+
+- `newman` in your `$PATH` to run automated Postman Collection tests
+
+> Installing Newman using NPM
+> - Newman can be installed locally to this project together with an updated PATH export
+>   ```
+>   $ npm install newman
+>   $ export PATH=$PWD/node_modules/.bin:$PATH
+>   ```
+> - Now run the Python specific initialization
+
+
 ## Run locally
 
-Please ensure you have curl and curllib installed on your machine.
-Also install dependencies using: `pip install -r requirements.txt`
+Using your running Python environment:
 
-Start using `python monitor.py`
+- Optionally refresh the requirements file: `pipenv requirements > requirements.txt`
+
+- Install dependencies using: `pip install -r requirements.txt`
+
+Using `pipenv` to local virtual Python environment:
+
+- Initialize project specific Python env: `pipenv install`
+
+- Drop into virtual Python env: `pipenv shell`
+
+Start using the main script:
+
+- Run: `./monitor.py --help`
+- Or: `python monitor.py --help`
+
 
 ## Run as container
 
 Build the container using Dockerfile
+```
+docker build -t urlmonitor:latest --pull -f docker/Dockerfile .
+```
 
 ## Azure Deployment Scenario For Private Endpoint Monitoring
 
 ![monitor-private-endpoints-azure.drawio](docs/monitor-private-endpoints-azure.drawio.svg)
 
+## Internal data flow mapping
+
+![data-processing-flow.drawio](docs/data-processing-flow.drawio.png)
