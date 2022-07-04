@@ -35,9 +35,9 @@ jobs:
       run: |
         set -x
         docker build \
-          -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.run_number }}
-          -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-          -f ./docker/Dockerfile
+          -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.run_number }} \
+          -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
+          -f ./docker/Dockerfile \
           -cache-from=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
 
     # - name: Build image
