@@ -9,7 +9,7 @@ on:
 env:
   REGISTRY: 'ghcr.io'
   IMAGE_NAME: 'eurofiber-cloudinfra/azure-url-monitor'
-  SCAN_IMAGE: 'false'
+  SCAN_IMAGE: 'true'
 
 jobs:
   build_and_push:
@@ -40,6 +40,20 @@ jobs:
           -f ./docker/Dockerfile \
           --cache-from=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest .
 
+    - name: Scan image
+      if: $SCAN_IMAGE == 'true'
+      uses: Azure/container-scan@v0
+      with:
+        image-name:  ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.run_number }}
+        severity-threshold: CRITICAL
+        run-quality-checks: true   
+
+    - name: Push image
+      run: |
+        set -x
+        docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.run_number }}
+        docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+        
     # - name: Build image
     #   uses: docker/build-push-action@v2
     #   with:
