@@ -8,7 +8,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: 'azureurlmonitor'
+  IMAGE_NAME: 'eurofiber-cloudinfra/azure-url-monitor'
 
 jobs:
   build_and_push:
