@@ -38,7 +38,7 @@ jobs:
           -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.run_number }} \
           -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
           -f ./docker/Dockerfile \
-          -cache-from=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          --cache-from=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
 
     # - name: Build image
     #   uses: docker/build-push-action@v2
