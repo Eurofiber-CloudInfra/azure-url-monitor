@@ -37,7 +37,7 @@ jobs:
       with:
         image-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.run_number }}
         severity-threshold: CRITICAL
-        run-quality-checks: true        
+        run-quality-checks: false   
 
     - name: Push image
       uses: docker/build-push-action@v2
