@@ -40,13 +40,11 @@ jobs:
           -f ./docker/Dockerfile \
           --cache-from=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest .
 
-    - name: Scan image
-      if: ${{ env.SCAN_IMAGE }} == 'true'
-      uses: Azure/container-scan@v0
+
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
       with:
-        image-name:  ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.run_number }}
-        severity-threshold: CRITICAL
-        run-quality-checks: true   
+        image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.run_number }}
 
     - name: Push image
       run: |
