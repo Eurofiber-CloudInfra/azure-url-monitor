@@ -36,5 +36,5 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         push: true
-        tags: ${{ steps.docker_meta.outputs.tags.lowercase }}
+        tags: ${{ steps.docker_meta.outputs.lowercase.tags }}
         file: ./docker/Dockerfile
