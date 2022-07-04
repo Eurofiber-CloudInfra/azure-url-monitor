@@ -18,7 +18,7 @@ jobs:
       run: |
         echo "IMAGE_TAG=latest" >> $GITHUB_ENV
 
-    - name: Set image tag for none-main branches
+    - name: Set image tag for non-main branches
       if:  github.ref != 'refs/heads/main'
       run: |
         echo "IMAGE_TAG=develop" >> $GITHUB_ENV      
