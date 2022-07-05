@@ -1,5 +1,6 @@
 targetScope = 'resourceGroup'
 
+param tags object
 param application_insights_id string
 param alert_name string
 @allowed([
@@ -28,6 +29,7 @@ param auto_mitigate bool = true
 resource alert 'Microsoft.Insights/metricAlerts@2018-03-01' = {
   name: alert_name
   location: 'global'
+  tags: tags
   properties: {
     description: alert_name
     enabled: true

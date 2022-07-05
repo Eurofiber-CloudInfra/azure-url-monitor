@@ -2,20 +2,25 @@ targetScope = 'resourceGroup'
 
 param location string 
 param tags object
+param container_name string = 'azure-url-monitor'
 
 @secure()
+@description('Instrumentation key of the Application Inisght instance')
 param ai_instrumentation_key string
-param postman_collection_url string
-param container_image string 
 
+@description('Full url to the postman exported collection json file or shared collection')
+param postman_collection_url string
+
+@description('Container image name. (eg ghcr.io/eurofiber-cloudinfra/azure-url-monitor:latest)')
+param container_image string
+
+@description('Subnet id of the for private Container Instance deployment. The subnet must have service delegation set to "Microsoft.ContainerInstance/containerGroups"')
 param container_subnet_id string = ''
 
-@description('The number of CPU cores to allocate to the container.')
-param cpu_cores int = 1
+param container_cpu_cores string = '0.25'
+param container_memory_gb string = '0.25'
 
-@description('The amount of memory to allocate to the container in gigabytes.')
-param memory_gb int = 1
-
+@description('Resource Id of the Log Analytics Workspace')
 param log_id string
 
 @allowed([
@@ -25,19 +30,17 @@ param log_id string
 ])
 param restart_policy string = 'Always'
 
-resource containerGroup 'Microsoft.ContainerInstance/containerGroups@2021-09-01' = {
+var _subnet_id = (empty(container_subnet_id)) ? [] : [{ id: container_subnet_id }]
+
+resource container_group 'Microsoft.ContainerInstance/containerGroups@2021-09-01' = {
   name: deployment().name
   location: location
   tags: tags
   properties: {
-    subnetIds: [
-      {
-        id: container_subnet_id
-      } 
-    ]
+    subnetIds: _subnet_id
     containers: [
       {
-        name: 'azure-url-monitor'
+        name: container_name
         properties: {
           image: container_image
           environmentVariables: [
@@ -54,16 +57,10 @@ resource containerGroup 'Microsoft.ContainerInstance/containerGroups@2021-09-01'
               value: '1'
             }    
           ]
-          // a port must be specified
-          ports: [
-            {
-              port: 80
-            }
-           ]
           resources: {
             requests: {
-              cpu: cpu_cores
-              memoryInGB: memory_gb
+              cpu: json(container_cpu_cores)
+              memoryInGB: json(container_memory_gb)
             }
           }
         }
@@ -79,14 +76,9 @@ resource containerGroup 'Microsoft.ContainerInstance/containerGroups@2021-09-01'
     }
     osType: 'Linux'
     restartPolicy: restart_policy
-    ipAddress: {
-      type: 'Private'
-      // a port must be specified
-      ports: [
-        {
-          port: 80
-        }
-      ]
-    }
   }
 }
+
+output id string = container_group.id
+output container_name string = container_name
+output rg_name string = resourceGroup().name

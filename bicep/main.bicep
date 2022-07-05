@@ -1,19 +1,23 @@
 targetScope = 'subscription'
 
+// PARAMETERS
 param location string = deployment().location
 param tags object = {
-  application: 'url monitor demo'
-  environment: 'test'
+  application: 'azure url monitor'
+  environment: 'demo'
 }
-
-param app_name string = 'myapp'
-param name_base string = '{0}-tst-euno-001'
-param postman_collection_url string = 'https://www.getpostman.com/collections/caa66e30322537554be0'
-param container_image string = 'ghcr.io/eurofiber-cloudinfra/azure-url-monitor:develop'
+param app_name string = 'demoapp'
+param name_base string = '{0}-tst-001'
+param postman_collection_url string = 'https://www.getpostman.com/collections/1d497e3f38536a136bb0'
+param container_image string = 'ghcr.io/eurofiber-cloudinfra/azure-url-monitor:43'
 param container_subnet_id string = ''
+param deploy_demo_vnet bool = true
 
+// VARIABLES
 var _name_base = format(name_base, app_name)
+var _container_subnet_id = (deploy_demo_vnet) ? vnet.outputs.container_subnet_id : container_subnet_id
 
+// RESOURCES
 resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: 'rg-${_name_base}'
   location: location
@@ -29,27 +33,17 @@ module log 'modules/log-analytics.bicep' = {
   }
 }
 
-module ai 'modules/application-insghts.bicep' = {
+module appi 'modules/application-insghts.bicep' = {
   scope: rg
-  name: 'ai-${_name_base}'
+  name: 'appi-${_name_base}'
   params: {
     location: location
-    log_id: log.outputs.id
     tags: tags
+    log_id: log.outputs.id
   }
 }
 
-module alert 'modules/availability-metric-alert.bicep' = {
-  scope: rg
-  name: 'alert-${_name_base}'
-  params: {
-    application_insights_id: ai.outputs.id
-    alert_name: 'Availability Test Failed For ${toUpper(app_name)}'
-  }
-}
-
-// deploy demo vnet with subnet delegated to containerinstance service if no container subnet is specified
-module demo_vnet 'modules/demo-vnet.bicep' = if (empty(container_subnet_id)) {
+module vnet 'modules/demo-vnet.bicep' = if (deploy_demo_vnet) {
   name: 'vnet-${_name_base}'
   scope: rg
   params: {
@@ -58,16 +52,39 @@ module demo_vnet 'modules/demo-vnet.bicep' = if (empty(container_subnet_id)) {
   }
 }
 
-module aci 'modules/container-group-private.bicep' = {
+module ci 'modules/container-group.bicep' = {
   scope: rg
-  name: 'aci-${_name_base}'
+  name: 'ci-${_name_base}'
   params: {
     location: location
     tags: tags
     container_image: container_image
-    ai_instrumentation_key: ai.outputs.instrumentation_key
+    ai_instrumentation_key: appi.outputs.instrumentation_key
     postman_collection_url: postman_collection_url
     log_id: log.outputs.id
-    container_subnet_id: (empty(container_subnet_id)) ? demo_vnet.outputs.container_subnet_id : container_subnet_id
+    container_subnet_id: _container_subnet_id
+  }
+}
+
+module alert_failed_test 'modules/alert-failed-test.bicep' = {
+  scope: rg
+  name: 'alert-failed-test-${_name_base}'
+  params: {
+    tags: tags
+    application_insights_id: appi.outputs.id
+    alert_name: 'Web Availability Test Failed for ${toUpper(app_name)}'
+  }
+}
+
+module alert_container_restart 'modules/alert-container-restart2.bicep' = {
+  scope: rg
+  name: 'alert-container-restart-${_name_base}'
+  params: {
+    location: location
+    tags: tags
+    log_id: log.outputs.id
+    ci_rg_name: ci.outputs.rg_name 
+    ci_name: ci.name
+    container_name: ci.outputs.container_name
   }
 }
