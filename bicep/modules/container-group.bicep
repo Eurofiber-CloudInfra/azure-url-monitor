@@ -17,8 +17,8 @@ param container_image string
 @description('Subnet id of the for private Container Instance deployment. The subnet must have service delegation set to "Microsoft.ContainerInstance/containerGroups"')
 param container_subnet_id string = ''
 
-param container_cpu_cores string = '0.25'
-param container_memory_gb string = '0.25'
+param container_cpu_cores string = '0.5'
+param container_memory_gb string = '0.2'
 
 @description('Resource Id of the Log Analytics Workspace')
 param log_id string
