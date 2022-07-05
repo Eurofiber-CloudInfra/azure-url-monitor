@@ -76,7 +76,7 @@ module alert_failed_test 'modules/alert-failed-test.bicep' = {
   }
 }
 
-module alert_container_restart 'modules/alert-container-restart2.bicep' = {
+module alert_container_restart 'modules/alert-container-restart.bicep' = {
   scope: rg
   name: 'alert-container-restart-${_name_base}'
   params: {

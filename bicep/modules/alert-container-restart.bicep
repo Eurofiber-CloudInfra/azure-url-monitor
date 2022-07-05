@@ -1,32 +1,66 @@
 targetScope = 'resourceGroup'
 
-param container_group_id string
+param location string
+param log_id string
 param tags object
-param alert_name string = 'Azure URL Monitor Container Restarted'
+param ci_rg_name string
+param ci_name string
+param container_name string
 
-resource alert 'Microsoft.Insights/activityLogAlerts@2020-10-01' = {
+param alert_name string = 'Azure URL Monitor Container Restarted'
+@minValue(0)
+@maxValue(4)
+@description('''
+0 = critical
+1 = error
+2 = warning
+3 = informational
+4 = verbose
+''')
+param severity int = 2
+
+var _query_tpl = '''
+  ContainerEvent_CL
+  | where ResourceGroup == '{0}'
+  | where ContainerGroup_s == '{1}'
+  | where ContainerName_s == '{2}'
+  | where Reason_s == 'BackOff'
+'''
+var _query = format(_query_tpl, ci_rg_name, ci_name, container_name)
+
+resource alert 'microsoft.insights/scheduledqueryrules@2021-08-01' = {
   name: alert_name
-  location: 'Global'
+  location: location
   tags: tags
+  kind: 'LogAlert'
   properties: {
-    condition: {
+    description: alert_name
+    enabled: true
+    autoMitigate: false 
+    severity: severity
+    evaluationFrequency: 'PT5M'
+    windowSize: 'PT15M'
+    skipQueryValidation: true
+    criteria: {
       allOf: [
         {
-          field: 'category'
-          equals: 'Administrative'
-        }
-        {
-          field: 'operationName'
-          equals: 'Microsoft.ContainerInstance/containerGroups/restart/action'
+            query: _query
+            timeAggregation: 'Count' 
+            dimensions: []
+            operator: 'GreaterThan'
+            threshold: 0
+            failingPeriods: {
+                numberOfEvaluationPeriods: 1
+                minFailingPeriodsToAlert: 1
+            }
         }
       ]
     }
     scopes: [
-      container_group_id 
+      log_id
     ]
     actions: {
       actionGroups: []
     }
-    enabled: true
   }
 }
