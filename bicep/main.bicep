@@ -7,26 +7,26 @@ param tags object = {
   environment: 'demo'
 }
 param app_name string = 'demoapp'
-param name_base string = '{0}-tst-001'
+param name_base string = '{0}-{1}-tst-001'
 param postman_collection_url string = 'https://www.getpostman.com/collections/1d497e3f38536a136bb0'
 param container_image string = 'ghcr.io/eurofiber-cloudinfra/azure-url-monitor:43'
 param container_subnet_id string = ''
 param deploy_demo_vnet bool = true
 
 // VARIABLES
-var _name_base = format(name_base, app_name)
+//var _name_base = format(name_base, app_name, '')
 var _container_subnet_id = (deploy_demo_vnet) ? vnet.outputs.container_subnet_id : container_subnet_id
 
 // RESOURCES
 resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
-  name: 'rg-${_name_base}'
+  name: format(name_base, 'rg', app_name)
   location: location
   tags: tags
 }
 
 module log 'modules/log-analytics.bicep' = {
   scope: rg
-  name: 'log-${_name_base}'
+  name: format(name_base, 'log', app_name)
   params: {
     location: location
     tags: tags
@@ -35,7 +35,7 @@ module log 'modules/log-analytics.bicep' = {
 
 module appi 'modules/application-insghts.bicep' = {
   scope: rg
-  name: 'appi-${_name_base}'
+  name: format(name_base, 'appi', app_name)
   params: {
     location: location
     tags: tags
@@ -44,7 +44,7 @@ module appi 'modules/application-insghts.bicep' = {
 }
 
 module vnet 'modules/demo-vnet.bicep' = if (deploy_demo_vnet) {
-  name: 'vnet-${_name_base}'
+  name: format(name_base, 'vnet', app_name)
   scope: rg
   params: {
     location: location
@@ -54,7 +54,7 @@ module vnet 'modules/demo-vnet.bicep' = if (deploy_demo_vnet) {
 
 module ci 'modules/container-group.bicep' = {
   scope: rg
-  name: 'ci-${_name_base}'
+  name: format(name_base, 'ci', app_name)
   params: {
     location: location
     tags: tags
@@ -68,7 +68,7 @@ module ci 'modules/container-group.bicep' = {
 
 module alert_failed_test 'modules/alert-failed-test.bicep' = {
   scope: rg
-  name: 'alert-failed-test-${_name_base}'
+  name: format(name_base, 'alert-failed-test', app_name)
   params: {
     tags: tags
     application_insights_id: appi.outputs.id
@@ -78,7 +78,7 @@ module alert_failed_test 'modules/alert-failed-test.bicep' = {
 
 module alert_container_restart 'modules/alert-container-restart.bicep' = {
   scope: rg
-  name: 'alert-container-restart-${_name_base}'
+  name: format(name_base, 'alert-container-restart', app_name)
   params: {
     location: location
     tags: tags
