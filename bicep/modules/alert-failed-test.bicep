@@ -23,7 +23,7 @@ param availability_percentage_threshold int = 80
 ''')
 param severity int = 2
 param evaluation_frequency string = 'PT1M'
-param windows_size string = 'PT5M'
+param windows_size string = 'PT15M'
 param auto_mitigate bool = true
 
 resource alert 'Microsoft.Insights/metricAlerts@2018-03-01' = {
