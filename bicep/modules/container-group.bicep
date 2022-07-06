@@ -52,7 +52,7 @@ resource container_group 'Microsoft.ContainerInstance/containerGroups@2021-09-01
           environmentVariables: [
             {
               name: 'AI_INSTRUMENTATION_KEY'
-              value: ai_instrumentation_key
+              secureValue: ai_instrumentation_key
             }
             {
               name: 'PM_COLLECTION_URL'
@@ -65,7 +65,7 @@ resource container_group 'Microsoft.ContainerInstance/containerGroups@2021-09-01
             {
               name: 'NM_TIMEOUT_REQUEST'
               value: string(postman_request_timeout_miliseconds)
-            } 
+            }
           ]
           resources: {
             requests: {
