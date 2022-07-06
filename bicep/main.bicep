@@ -7,7 +7,10 @@ param tags object = {
   environment: 'demo'
 }
 param app_name string = 'demoapp'
+
+@description('Resource naming base template. Uses {0} for resource abbreviation and {1} for the application name')
 param name_base string = '{0}-{1}-tst-001'
+
 param postman_collection_url string = 'https://www.getpostman.com/collections/1d497e3f38536a136bb0'
 param container_image string = 'ghcr.io/eurofiber-cloudinfra/azure-url-monitor:43'
 param container_subnet_id string = ''
@@ -71,7 +74,7 @@ module alert_failed_test 'modules/alert-failed-test.bicep' = {
   params: {
     tags: tags
     application_insights_id: appi.outputs.id
-    alert_name: 'Web Availability Test Failed for ${toUpper(app_name)}'
+    alert_name: 'Availability Test Failed for ${toUpper(app_name)}'
   }
 }
 
