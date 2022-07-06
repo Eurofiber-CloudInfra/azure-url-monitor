@@ -11,6 +11,12 @@ param ai_instrumentation_key string
 @description('Full url to the postman exported collection json file or shared collection')
 param postman_collection_url string
 
+@description('Timeout in miliseonds for a single request')
+param postman_request_timeout_miliseconds int = 20000
+
+@description('Frequency in minutes')
+param postman_test_freuency_minutes int = 1
+
 @description('Container image name. (eg ghcr.io/eurofiber-cloudinfra/azure-url-monitor:latest)')
 param container_image string
 
@@ -18,7 +24,7 @@ param container_image string
 param container_subnet_id string = ''
 
 param container_cpu_cores string = '0.5'
-param container_memory_gb string = '0.1'
+param container_memory_gb string = '0.2'
 
 @description('Resource Id of the Log Analytics Workspace')
 param log_id string
@@ -54,8 +60,12 @@ resource container_group 'Microsoft.ContainerInstance/containerGroups@2021-09-01
             }
             {
               name: 'TEST_FREQUENCY_MINUTES'
-              value: '1'
-            }    
+              value: string(postman_test_freuency_minutes)
+            }
+            {
+              name: 'NM_TIMEOUT_REQUEST'
+              value: string(postman_request_timeout_miliseconds)
+            } 
           ]
           resources: {
             requests: {
