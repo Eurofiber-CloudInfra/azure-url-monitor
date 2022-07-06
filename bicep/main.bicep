@@ -14,7 +14,6 @@ param container_subnet_id string = ''
 param deploy_demo_vnet bool = true
 
 // VARIABLES
-//var _name_base = format(name_base, app_name, '')
 var _container_subnet_id = (deploy_demo_vnet) ? vnet.outputs.container_subnet_id : container_subnet_id
 
 // RESOURCES
