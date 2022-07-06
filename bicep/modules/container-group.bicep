@@ -18,7 +18,7 @@ param container_image string
 param container_subnet_id string = ''
 
 param container_cpu_cores string = '0.5'
-param container_memory_gb string = '0.2'
+param container_memory_gb string = '0.1'
 
 @description('Resource Id of the Log Analytics Workspace')
 param log_id string
@@ -61,6 +61,10 @@ resource container_group 'Microsoft.ContainerInstance/containerGroups@2021-09-01
             requests: {
               cpu: json(container_cpu_cores)
               memoryInGB: json(container_memory_gb)
+            }
+            limits: {
+              cpu: json(container_cpu_cores)
+              memoryInGB: json(container_memory_gb)             
             }
           }
         }
