@@ -1,8 +1,10 @@
 targetScope = 'resourceGroup'
 
-param tags object
+// PARAMETERS
 param location string 
+param tags object
 
+// VARIABLES
 var _subnets = [
   {
     name: 'container-instances'
@@ -10,7 +12,7 @@ var _subnets = [
   }
 ]
 
-
+// RESOURCES
 resource vnet 'Microsoft.Network/virtualNetworks@2020-06-01' = {
   name: deployment().name
   location: location 
@@ -38,4 +40,5 @@ resource vnet 'Microsoft.Network/virtualNetworks@2020-06-01' = {
   }
 }
 
+// OUTPUTS
 output container_subnet_id string = vnet.properties.subnets[0].id
