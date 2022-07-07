@@ -12,6 +12,7 @@ resource log 'Microsoft.OperationalInsights/workspaces@2021-12-01-preview' = {
    sku: {
     name: sku
    }
+   retentionInDays: 30
   }
 }
 
