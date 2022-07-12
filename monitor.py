@@ -662,8 +662,8 @@ def sanitize_appinsights(payload: dict) -> dict:
     return payload
 
 
-def publish_in_appinsights(data: dict, tc: TelemetryClient, location: str = None):
-    for report_doc in data.values():
+def publish_in_appinsights(data: dict, tc: TelemetryClient, location: str = None, flush_size: int = 100):
+    for counter, report_doc in enumerate(data.values(), start=1):
         logging.debug(f"Preparing payload for document id: [{report_doc.id}]")
         tc.context.operation.id = report_doc.id
         payload = dict(
@@ -679,9 +679,15 @@ def publish_in_appinsights(data: dict, tc: TelemetryClient, location: str = None
         logging.debug(str(payload))
         # send results
         tc.track_availability(**payload)
-        tc.flush()
         logging.info(f"Report for document id [{report_doc.id}] submitted.")
-    pass
+        if counter > 0 and counter % flush_size == 0:
+            # use a maximum batch size of flush_size items
+            logging.debug("Flush size reached, submitting queue now.")
+            tc.flush()
+            logging.debug("Flush done. Moving on.")
+    logging.debug("Flush app insights tracking queue")
+    tc.flush()
+    logging.debug("Flush done. End of batch submission.")
 
 
 @app.command()
