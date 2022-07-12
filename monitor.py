@@ -40,7 +40,7 @@ import ipaddress
 import crl_checker
 
 from enum import IntEnum
-from typing import Any, Tuple
+from typing import Any, Tuple, List
 from pathlib import Path
 from datetime import datetime
 from pprint import pprint as pp
@@ -347,18 +347,29 @@ class check_result_document(pm_item):
         self.test_ssl_success = not ssl_test_failed
         return self.test_ssl_success
 
-    def validate_test_report(self, include_ssl_test_results: bool = True) -> bool:
+    def validate_test_report(self, acceptable_response_codes: list[int] = [200], include_ssl_test_results: bool = True) -> bool:
         logging.debug("Validating test report data.")
         if self.failure:
+            logging.debug("Found failures, test failed.")
             self.test_success = False
             self.test_messages.append(str(self.failure))
         else:
+            logging.debug("No failures.")
             self.test_success = True
+
+        if self.response:
+            logging.debug(f"Evaluating acceptable response code {self.response.code}")
+            self.test_success &= (self.response.code in acceptable_response_codes)
+
         if include_ssl_test_results:
+            logging.debug("Evaluating SSL/TLS test result")
             self.test_success &= self.test_ssl_success
 
         if self.test_success:
+            logging.info("Test passed")
             self.test_messages.append("Passed")
+        else:
+            logging.info("Test failed")
         return self.test_success
 
 
@@ -710,6 +721,8 @@ def urlcheck(
         default="1.1.1.1:53:UDP", envvar="AUTO_LOCATION_TEST_HOSTINFO"
     ),
     verbosity: int = typer.Option(None, "-v", count=True),
+    rc_range: Tuple[int, int] = typer.Option((None, None), help="Start (inclusive) End (exclusive) range of acceptable response codes for successful tests."),
+    rc_list: List[int] = typer.Option([200], "-r", help="Acceptable response code. Multiple uses."),
 ):
     call_args = locals()
 
@@ -756,8 +769,18 @@ def urlcheck(
                 check_expiration=certificate_check_expiration,
                 expiration_gracetime_days=certificate_expiration_gracetime_days,
             )
+
+        rc_accept_list = []
+        (rc_range_start, rc_range_end) = rc_range
+        if rc_range_start and rc_range_end:
+            rc_accept_list = list(range(rc_range_start, rc_range_end))
+        if rc_list:
+            rc_accept_list.extend(rc_list)
+        rc_accept_list = list(set(rc_accept_list))
+
         test_report_doc.validate_test_report(
-            include_ssl_test_results=certificate_validation_check
+            acceptable_response_codes=rc_accept_list,
+            include_ssl_test_results=certificate_validation_check,
         )
 
     if not location:
