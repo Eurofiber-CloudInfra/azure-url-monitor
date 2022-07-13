@@ -1,4 +1,4 @@
-## Introduction
+# Introduction
 
 This project has been created because many of our Azure customers required to monitor privately exposed http endpoints. As [Azure Application Insights](https://docs.microsoft.com/en-us/azure/azure-monitor/app/app-insights-overview) only offers to run availability tests against publicly exposed endpoints and [Azure Connection Monitor](https://docs.microsoft.com/en-us/azure/network-watcher/connection-monitor-overview) didn't provide advanced enough http test configurations we decided to create an alternative solution. 
 
@@ -11,7 +11,7 @@ Next to running Postman collection tests the Azure URL Monitor can run pro-activ
 > **_NOTE:_**  This project is still work in progress but we decide to make it public anyhow so others can benefit from it.
 
 
-## Getting Started
+# Getting Started
 
 To run the monitor successfully it needs the `Instrumentation Key` of the Application Insights instance and a url to the `Postman collection` file.
 
@@ -21,7 +21,7 @@ The `Postman collection URL` can be either to a [publicly shared Postman collect
 
 > **_NOTE:_**   If you don't have anything setup yet but want to to try out the monitor in your own Azure environment we have a [Bicep deployment](bicep/readme.md) available that deploys everything you need.
 
-### Run Locally
+## Run Locally
 
 Using your running Python environment:
 
@@ -50,7 +50,7 @@ Example
 > **_NOTE:_**  The python code doesn't take care of scheduling. See [docker/entrypoint.sh](docker/entrypoint.sh) how this is handled inside a container.
 
 
-### Run as a Container
+## Run as a Container
 
 Build the container:
 ```
@@ -66,7 +66,11 @@ docker run  -e AI_INSTRUMENTATION_KEY=<your key> \
             urlmonitor
 ```
 
-## Configuration Options
+## Run as an Azure Container Instance
+
+Check the [Bicep code](bicep/README.md) of the demo deployment.
+
+# Configuration Options
 
 | CLI Parameter            | Container Environment Variable          | Description                                                                                                                                                             | Default Value | Example Value                                               |
 | ------------------------ | --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | ----------------------------------------------------------- |
