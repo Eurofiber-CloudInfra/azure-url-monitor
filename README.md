@@ -2,9 +2,9 @@
 
 This project has been created because many of our Azure customers required to monitor privately exposed http endpoints. As [Azure Application Insights](https://docs.microsoft.com/en-us/azure/azure-monitor/app/app-insights-overview) only offers to run availability tests against publicly exposed endpoints and [Azure Connection Monitor](https://docs.microsoft.com/en-us/azure/network-watcher/connection-monitor-overview) didn't provide advanced enough http test configurations we decided to create an alternative solution. 
 
-Because we :heart: [Postman](https://www.postman.com) we base the configuration of the availability tests on a Postman collection. The [Azure URL Monitor](https://github.com/Eurofiber-CloudInfra/azure-url-monitor) allows you to run these tests from anywhere in your network and store the results in an [Azure Application Insights](https://docs.microsoft.com/en-us/azure/azure-monitor/app/app-insights-overview) instance.
+Because we :heart: [Postman](https://www.postman.com) we based the configuration of the availability tests on a Postman collection. The Azure URL Monitor allows you to run these tests from anywhere in your network and store the results in an [Azure Application Insights](https://docs.microsoft.com/en-us/azure/azure-monitor/app/app-insights-overview) instance.
 
-Next to running Postman collection tests the [Azure URL Monitor](https://github.com/Eurofiber-CloudInfra/azure-url-monitor) can run pro-active lifetime checks on SSL certificates. 
+Next to running Postman collection tests the Azure URL Monitor can run pro-active lifetime checks on SSL certificates. 
 
 ![concept](docs/images/azure-url-monitor-concept.drawio.png)
 
