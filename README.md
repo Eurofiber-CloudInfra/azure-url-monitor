@@ -1,6 +1,8 @@
 # Table of Contents
 
 1. [Introduction](#introduction)
+2. [Getting Started](#gettingstarted)
+
 
 ## Introduction<a name="introduction"></a>
 
@@ -17,13 +19,13 @@ Next to running Postman collection tests the [Azure URL Monitor](https://github.
 
 ## Getting Started <a name="gettingstarted"></a>
 
-The run the monitor successfully it needs the `Instrumentation Key` of your Application Insights instance and a url to your `Postman collection URL`.
+To run the monitor successfully it needs the `Instrumentation Key` of the Application Insights instance and a url to the `Postman collection URL`.
 
 The `Instrumentation Key` can be found in the Overview page of your Application Insights instance.
 
-The `Postman collection URL` can be either to a [publicly shared Postman collection](https://learning.postman.com/docs/collaborating-in-postman/sharing/) using the JSON link option or to an [exported collection file](https://learning.postman.com/docs/getting-started/importing-and-exporting-data/#exporting-collections) on other storage.  
+The `Postman collection URL` can be either to a [publicly shared Postman collection](https://learning.postman.com/docs/collaborating-in-postman/sharing/) using the JSON link option or to an [exported collection file](https://learning.postman.com/docs/getting-started/importing-and-exporting-data/#exporting-collections) on storage accessible via http.  
 
-> **_NOTE:_**   If you don't have any thing setup yet but want to to try out the monitor in your own environment we have a [Bicep deployment](bicep/readme.md) available that deploys everything you need.
+> **_NOTE:_**   If you don't have anything setup yet but want to to try out the monitor in your own Azure environment we have a [Bicep deployment](bicep/readme.md) available that deploys everything you need.
 
 ### Run Locally
 
@@ -72,3 +74,13 @@ docker run  -e AI_INSTRUMENTATION_KEY=<your key> \
 
 ## Configuration Options
 
+| CLI Parameter            | Container Environment Variable          | Description                                                                                                                                                             | Default Value | Example Value                                               |
+| ------------------------ | --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | ----------------------------------------------------------- |
+| `ai-instrumentation-key` | `AI_INSTRUMENTATION_KEY`                | Application Insights Instrumentation Key.                                                                                                                               | ''            | 0ca426c9-6e7a-5abf-8849-b9fc5e1efcde                        |
+| `pm-collection-url`      | `PM_COLLECTION_URL`                     | Url to the json file containing the Postman Collection definition.                                                                                                      | ''            | https://www.getpostman.com/collections/e4c297acc0f14eb0f666 |
+| n/a                      | `TEST_FREQUENCY_MINUTES`                | Test frequency in minutes. If set to "0" will not repeat execution                                                                                                      | 60            | 60                                                          |
+|                          | `CERTIFICATE_VALIDATION_CHECK`          | Enable/disable certificate validation. When enabled the test will fail if the certificate is not valid.                                                                 | true          | true                                                        |
+|                          | `CERTIFICATE_IGNORE_SELF_SIGNED`        | Enable/disable certificate failure when encountering self-signed certificates.                                                                                          | true          | true                                                        |
+|                          | `CERTIFICATE_CHECK_EXPIRATION`          | Enable/disable certificate expiration check. When enabled the test will fail if certificate expires with the number of days specified in `CERTIFICATE_EXPIRATION_DAYS`. | true          | true                                                        |
+|                          | `CERTIFICATE_EXPIRATION_GRACETIME_DAYS` | Number of days before the certificate will expire.                                                                                                                      | 14            | 14                                                          |
+|                          | `LOCATION`                              | User-defined test location or defaults to host IP. This location will appear in Application Insights                                                                    | <HOST_IP>     | 127.0.0.1 / Greenland                                       |
