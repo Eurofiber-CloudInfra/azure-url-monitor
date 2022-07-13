@@ -13,7 +13,7 @@ Next to running Postman collection tests the Azure URL Monitor can run pro-activ
 
 ## Getting Started
 
-To run the monitor successfully it needs the `Instrumentation Key` of the Application Insights instance and a url to the `Postman collection`.
+To run the monitor successfully it needs the `Instrumentation Key` of the Application Insights instance and a url to the `Postman collection` file.
 
 The `Instrumentation Key` can be found in the Overview page of your Application Insights instance.
 
