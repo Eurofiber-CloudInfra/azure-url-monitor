@@ -48,7 +48,7 @@ param alert_container_restart_name string = format(name_base, 'alert-container-r
 param alert_container_restart_displayname string = 'Azure URL Monitor Container Restarted'
 
 @description('URL to the Postman Collection file. By default it uses a demo collection with one successful and one failing request')
-param postman_collection_url string = 'https://www.getpostman.com/collections/e911b0e57becdf131593'
+param postman_collection_url string = 'https://www.getpostman.com/collections/772cbe72da0c0f2f0fb4'
 
 @description('Azure URL Monitor image name')
 param container_image string = 'ghcr.io/eurofiber-cloudinfra/azure-url-monitor:latest'
