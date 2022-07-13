@@ -14,13 +14,22 @@ Although the VNet integration is not necessary for the demo deployment it prepar
 
 # Deployment
 
-Change the parameter defaults in the `main.bicep` file to add your application name and resource naming preference, than execute the commands below.
+The deployment has been prepared with default parameters values. You can override the default values using a [parameter file](https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/parameter-files).
+
+To deploy this demo using the default values run the following commands:
 
 ```
  $ az login
  $ az account set --subscription <YOUR SUBSCRIPTION ID> 
- $ az deployment sub create --location <YOUR LOCATION> --template-file main.bicep
+ $ az deployment sub create --location <YOUR LOCATION> --template-file main.bicep 
+```
 
+To deploy this demo using your own parameter file run the following commands:
+
+```
+ $ az login
+ $ az account set --subscription <YOUR SUBSCRIPTION ID> 
+ $ az deployment sub create --location <YOUR LOCATION> --template-file main.bicep  --parameters @your.parameters.json
 ```
 
 # Verify Deployment

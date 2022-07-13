@@ -1,3 +1,10 @@
+/*
+
+This is an example deployment that will setup and configure all necessary resources in your environment to test the Azure URL Monitor. 
+It is prepared to deploy with the parameter default values but feel free to adjust it to suite your environment.
+
+*/
+
 targetScope = 'subscription'
 
 // PARAMETERS
@@ -6,29 +13,68 @@ param tags object = {
   application: 'azure url monitor'
   environment: 'demo'
 }
+
+@description('Application name that the Azure URL monitor will be monitoring')
 param app_name string = 'demoapp'
 
 @description('Resource naming base template. Uses {0} for resource abbreviation and {1} for the application name')
 param name_base string = '{0}-{1}-tst-001'
 
-param postman_collection_url string = 'https://www.getpostman.com/collections/1d497e3f38536a136bb0'
-param container_image string = 'ghcr.io/eurofiber-cloudinfra/azure-url-monitor:43'
+@description('Resource name for the Resource Group')
+param rg_name string = format(name_base, 'rg', app_name)
+
+@description('Resource name for the Log Anaytics Workspace')
+param log_name string = format(name_base, 'log', app_name)
+
+@description('Resource name for the Applications Insights Instance')
+param appi_name string = format(name_base, 'appi', app_name)
+
+@description('Resource name for demo Vnet')
+param vnet_name string = format(name_base, 'vnet', app_name)
+
+@description('Resource name for Container Instance')
+param ci_name string = format(name_base, 'ci', app_name)
+
+@description('Resource name for failed test alert')
+param alert_failed_test_name string = format(name_base, 'alert-failed-test', app_name)
+
+@description('Display name for failed test alert')
+param alert_failed_test_displayname string = 'Availability Test Failed for ${toUpper(app_name)}'
+
+@description('Resource name for container restart  alert')
+param alert_container_restart_name string = format(name_base, 'alert-container-restart', app_name)
+
+@description('Display name for container restart  alert')
+param alert_container_restart_displayname string = 'Azure URL Monitor Container Restarted'
+
+@description('URL to the Postman Collection file. By default it uses a demo collection with one successful and one failing request')
+param postman_collection_url string = 'https://www.getpostman.com/collections/772cbe72da0c0f2f0fb4'
+
+@description('Azure URL Monitor image name')
+param container_image string = 'ghcr.io/eurofiber-cloudinfra/azure-url-monitor:latest'
+
+@description('''
+  Subnet id for the Container Instance deployment. The subnet must have service delegation set to "Microsoft.ContainerInstance/containerGroups".
+  For a demo deployment this paramater can be left empty and use the "deploy_demo_vnet" parameter to handle demo vnet/subnet creation
+''')
 param container_subnet_id string = ''
+
+@description('Switch to deploy a demo vnet with a delegated subnet for the Container Instance. Must be set to "false" when a container_subnet_id is provided')
 param deploy_demo_vnet bool = true
 
 // VARIABLES
-var _container_subnet_id = (deploy_demo_vnet) ? vnet.outputs.container_subnet_id : container_subnet_id
+var _container_subnet_id = deploy_demo_vnet && empty(container_subnet_id) ? vnet.outputs.container_subnet_id : container_subnet_id
 
 // RESOURCES
 resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
-  name: format(name_base, 'rg', app_name)
+  name: rg_name
   location: location
   tags: tags
 }
 
 module log 'modules/log-analytics.bicep' = {
   scope: rg
-  name: format(name_base, 'log', app_name)
+  name: log_name
   params: {
     location: location
     tags: tags
@@ -37,7 +83,7 @@ module log 'modules/log-analytics.bicep' = {
 
 module appi 'modules/application-insghts.bicep' = {
   scope: rg
-  name: format(name_base, 'appi', app_name)
+  name: appi_name
   params: {
     location: location
     tags: tags
@@ -45,8 +91,8 @@ module appi 'modules/application-insghts.bicep' = {
   }
 }
 
-module vnet 'modules/demo-vnet.bicep' = if (deploy_demo_vnet) {
-  name: format(name_base, 'vnet', app_name)
+module vnet 'modules/demo-vnet.bicep' = if (deploy_demo_vnet && empty(container_subnet_id)) {
+  name: vnet_name
   scope: rg
   params: {
     location: location
@@ -56,7 +102,7 @@ module vnet 'modules/demo-vnet.bicep' = if (deploy_demo_vnet) {
 
 module ci 'modules/container-group.bicep' = {
   scope: rg
-  name: format(name_base, 'ci', app_name)
+  name: ci_name
   params: {
     location: location
     tags: tags
@@ -70,21 +116,22 @@ module ci 'modules/container-group.bicep' = {
 
 module alert_failed_test 'modules/alert-failed-test.bicep' = {
   scope: rg
-  name: format(name_base, 'alert-failed-test', app_name)
+  name: alert_failed_test_name
   params: {
     tags: tags
     application_insights_id: appi.outputs.id
-    alert_name: 'Availability Test Failed for ${toUpper(app_name)}'
+    alert_displayname: alert_failed_test_displayname
   }
 }
 
 module alert_container_restart 'modules/alert-container-restart.bicep' = {
   scope: rg
-  name: format(name_base, 'alert-container-restart', app_name)
+  name: alert_container_restart_name
   params: {
     location: location
     tags: tags
     log_id: log.outputs.id
+    alert_displayname: alert_container_restart_displayname
     ci_rg_name: ci.outputs.rg_name 
     ci_name: ci.name
     container_name: ci.outputs.container_name

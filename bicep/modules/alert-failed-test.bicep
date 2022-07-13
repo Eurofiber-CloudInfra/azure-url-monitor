@@ -4,7 +4,7 @@ targetScope = 'resourceGroup'
 param tags object
 
 @description('Name of the alert that will be genrated. The alert name will be generic for all availability tests, the failed test name is in the dimension value')
-param alert_name string
+param alert_displayname string
 
 @description('Application Insights resource id which the alert rule is scoped to')
 param application_insights_id string
@@ -35,11 +35,11 @@ param auto_mitigate bool = true
 
 // RESOURCES
 resource alert 'Microsoft.Insights/metricAlerts@2018-03-01' = {
-  name: alert_name
+  name: alert_displayname
   location: 'global'
   tags: tags
   properties: {
-    description: alert_name
+    description: alert_displayname
     enabled: true
     autoMitigate: auto_mitigate 
     severity: severity
