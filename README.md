@@ -68,7 +68,7 @@ docker run  -e AI_INSTRUMENTATION_KEY=<your key> \
 
 ## Run as an Azure Container Instance
 
-Check the [Bicep code](bicep/README.md) of the demo deployment.
+Check the [Bicep code](bicep/readme.md) of the demo deployment.
 
 # Configuration Options
 
