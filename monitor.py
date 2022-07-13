@@ -360,6 +360,8 @@ class check_result_document(pm_item):
         if self.response:
             logging.debug(f"Evaluating acceptable response code {self.response.code}")
             self.test_success &= (self.response.code in acceptable_response_codes)
+            if not self.test_success:
+                self.test_messages.append(f"Default status code test failed. Status code '{self.response.code}' not in {acceptable_response_codes}")
 
         if include_ssl_test_results:
             logging.debug("Evaluating SSL/TLS test result")
