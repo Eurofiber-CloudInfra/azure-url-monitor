@@ -43,7 +43,7 @@ Start using the main script:
 Example
 ```
 $ ./monitor.py --ai-instrumentation-key  <your key> \
-             --pm-collection-url <your collection url>
+               --pm-collection-url <your collection url>
 
 ```
 
