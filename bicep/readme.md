@@ -54,12 +54,12 @@ Get yourself familiar with [Postman](https://www.postman.com/).
 ## Publicly Shared Collection
 
 - `Share` your Postman collection using a JSON link 
-- Copy the url and pass that to the `postman_collection_url` parameter in the `main.bicep` file
+- Copy the url and pass that to the `postman_collection_url` parameter to the `main.bicep` 
 - Re-run the deployment 
 
 ## Exported Collection
 
 - `Export` your Postman collection  
 - Store the json file on storage that is accessible from the Container Instance. (eg Azure Blob Storage)
-- Pass the url to the `postman_collection_url` parameter in the `main.bicep` 
+- Pass the url to the `postman_collection_url` parameter to the `main.bicep` 
 - Re-run the deployment
