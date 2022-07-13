@@ -655,7 +655,7 @@ def sanitize_appinsights(payload: dict) -> dict:
     name = re.sub(r"(\-\-)+", r"\1", name)
     name = name.strip()
     if re.match(r"^[^a-zA-Z]", name):
-        name = f"C-{name}"
+        name = re.sub(r"^([^\w]+)(.+)", r"\2", name)
     if len(name) > 64:
         name = f"{name[:-3]}..."
     payload.update(dict(name=name))
