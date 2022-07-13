@@ -1,38 +1,31 @@
-# Azure URL Monitor
+# Table of Contents
 
-Slightly more advanced version of the URL monitor tool of Azure that stores the results in a Log Analytics Workspace.
+1. [Introduction](#introduction)
 
-Goals:
-- [ ] Can run quickly as cron job
-- [ ] Support of multiple tests in parallel
-- [ ] Results should be stored in Application Insights using [AppAvailabilityResults](docs/ApplicationInsightsData.md) schema
-- [ ] Can run on a VM and as Docker container
-- [x] Tests should be defined in Postman
-- [x] Retrieve certificate expiration date and store this
-- [ ] If the monitor fails sufficient log information should be available to generate an alert
-- [ ] <strike>Measurements in nanoseconds</strike> Note: this was deemed unnecessary
+## Introduction<a name="introduction"></a>
 
-Nice to have:
-- [ ] A cool name
-- [ ] Support for Kubernetes
-- [ ] Cloud-init setup ready to roll
-- [ ] Automatically create Azure Monitoring Alerts for each test
-- [ ] Fun
+This project has been created because many of our Azure customers required to monitor privately exposed http endpoints. As [Azure Application Insights](https://docs.microsoft.com/en-us/azure/azure-monitor/app/app-insights-overview) only offers to run availability tests against publicly exposed endpoints and [Azure Connection Monitor](https://docs.microsoft.com/en-us/azure/network-watcher/connection-monitor-overview) didn't provide advanced enough http test configurations we decided to create an alternative solution. 
 
-## External dependencies
+Because we :heart: [Postman](https://www.postman.com) we base the configuration of the availability tests on a Postman collection. The [Azure URL Monitor](https://github.com/Eurofiber-CloudInfra/azure-url-monitor) allows you to run these tests from anywhere in your network and store the results in an [Azure Application Insights](https://docs.microsoft.com/en-us/azure/azure-monitor/app/app-insights-overview) instance.
 
-- `newman` in your `$PATH` to run automated Postman Collection tests
+Next to running Postman collection tests the [Azure URL Monitor](https://github.com/Eurofiber-CloudInfra/azure-url-monitor) can run pro-active lifetime checks on SSL certificates. 
 
-> Installing Newman using NPM
-> - Newman can be installed locally to this project together with an updated PATH export
->   ```
->   $ npm install newman
->   $ export PATH=$PWD/node_modules/.bin:$PATH
->   ```
-> - Now run the Python specific initialization
+![concept](docs/images/azure-url-monitor-concept.drawio.png)
+
+This project is still work in progress but we decide to make it public anyhow so others can benefit from it.
 
 
-## Run locally
+## Getting Started <a name="gettingstarted"></a>
+
+The run the monitor successfully it needs the `Instrumentation Key` of your Application Insights instance and a url to your `Postman collection URL`.
+
+The `Instrumentation Key` can be found in the Overview page of your Application Insights instance.
+
+The `Postman collection URL` can be a url of either a [publicly shared Postman collection](https://learning.postman.com/docs/collaborating-in-postman/sharing/) using the JSON link option or to an [exported collection file](https://learning.postman.com/docs/getting-started/importing-and-exporting-data/#exporting-collections).  
+
+If you don't have any thing setup yet but want to to try out the [Azure URL Monitor](https://github.com/Eurofiber-CloudInfra/azure-url-monitor) in your own environment we have a [bicep deployment](bicep/readme.md) available that deploys everything you need.
+
+### Run Locally
 
 Using your running Python environment:
 
@@ -51,18 +44,31 @@ Start using the main script:
 - Run: `./monitor.py --help`
 - Or: `python monitor.py --help`
 
+Example
+```
+./monitor.py --ai-instrumentation-key  <your key> \
+             --pm-collection-url <your collection url>
 
-## Run as container
+```
 
-Build the container using Dockerfile
+> **_NOTE:_**  The python code doesn't take care of scheduling. See [docker/entrypoint.sh](docker/entrypoint.sh) how this is handled inside a container.
+
+
+### Run as a Container
+
+Build the container:
 ```
 docker build -t urlmonitor:latest --pull -f docker/Dockerfile .
 ```
 
-## Azure Deployment Scenario For Private Endpoint Monitoring
+Run the container:
 
-![monitor-private-endpoints-azure.drawio](docs/monitor-private-endpoints-azure.drawio.svg)
+```
+docker run  -e AI_INSTRUMENTATION_KEY=<your key> \
+            -e PM_COLLECTION_URL=<your collection url>\
+            -e TEST_FREQUENCY_MINUTES=1 \
+            urlmonitor
+```
 
-## Internal data flow mapping
+## Configuration Options
 
-![data-processing-flow.drawio](docs/data-processing-flow.drawio.png)
