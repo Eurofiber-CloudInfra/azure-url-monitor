@@ -63,7 +63,7 @@ param container_subnet_id string = ''
 param deploy_demo_vnet bool = true
 
 // VARIABLES
-var _container_subnet_id = (deploy_demo_vnet) ? vnet.outputs.container_subnet_id : container_subnet_id
+var _container_subnet_id = deploy_demo_vnet && empty(container_subnet_id) ? vnet.outputs.container_subnet_id : container_subnet_id
 
 // RESOURCES
 resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
@@ -91,7 +91,7 @@ module appi 'modules/application-insghts.bicep' = {
   }
 }
 
-module vnet 'modules/demo-vnet.bicep' = if (deploy_demo_vnet) {
+module vnet 'modules/demo-vnet.bicep' = if (deploy_demo_vnet && empty(container_subnet_id)) {
   name: vnet_name
   scope: rg
   params: {
