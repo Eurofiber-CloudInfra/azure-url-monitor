@@ -1,6 +1,7 @@
 
 # Introduction
 Deploys a complete set of resources to take the url monitor for a spin. Resources deployed:
+- Resource Group
 - Log Analytics Workspace
 - Application Insights Instance
 - Vnet with subnet delegated to 'Microsoft.ContainerInstance/containerGroups' service
@@ -8,9 +9,9 @@ Deploys a complete set of resources to take the url monitor for a spin. Resource
 - Web Availability Test Alert Rule
 - Container Restart Alert Rule
 
-Although the VNet integration is not necessary for the demo deployment it prepares the environment for running test on endpoints in your network that are not reachable from the internet.
+Although the VNet integration is not necessary for the demo deployment it showcases an environment for running tests against private endpoints.
 
-![demo](../docs/demo-setup.drawio.svg)
+![demo](../docs/images/azure-url-monitor-demo.drawio.png)
 
 # Deployment
 
@@ -29,13 +30,13 @@ Change the parameter defaults in the `main.bicep` file to add your application n
 
 After a successful deployment it might take a couple of minutes for the container instance to pull the image and start the url monitor container. To see the results goto the demo **Application Insights** resource in the Azure portal and select `Availability` from the left menu. This will show the results of the two Test Requests. To see the test result details click on the `Failed` button on the bottom rights and select one of the failed tests. 
 
-![demo-results](../docs/demo-results.png)
+![demo-results](../docs/images/demo-results.png)
 
 ## Availability Test Alerts
 
 From the **Application Insights** interface select `Alerts` from the left menu. This will show an alert for the failed test.
 
-![demo-alert](../docs/demo-alert.png)
+![demo-alert](../docs/images/demo-alert.png)
 
 # Running Your Own Tests 
 

@@ -21,9 +21,9 @@ The run the monitor successfully it needs the `Instrumentation Key` of your Appl
 
 The `Instrumentation Key` can be found in the Overview page of your Application Insights instance.
 
-The `Postman collection URL` can be either to a [publicly shared Postman collection](https://learning.postman.com/docs/collaborating-in-postman/sharing/) using the JSON link option or to an [exported collection file](https://learning.postman.com/docs/getting-started/importing-and-exporting-data/#exporting-collections) on other accessible storage.  
+The `Postman collection URL` can be either to a [publicly shared Postman collection](https://learning.postman.com/docs/collaborating-in-postman/sharing/) using the JSON link option or to an [exported collection file](https://learning.postman.com/docs/getting-started/importing-and-exporting-data/#exporting-collections) on other storage.  
 
-> **_NOTE:_**   If you don't have any thing setup yet but want to to try out the monitor in your own environment we have a [bicep deployment](bicep/readme.md) available that deploys everything you need.
+> **_NOTE:_**   If you don't have any thing setup yet but want to to try out the monitor in your own environment we have a [Bicep deployment](bicep/readme.md) available that deploys everything you need.
 
 ### Run Locally
 
