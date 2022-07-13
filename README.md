@@ -1,10 +1,4 @@
-# Table of Contents
-
-1. [Introduction](#introduction)
-2. [Getting Started](#gettingstarted)
-
-
-## Introduction<a name="introduction"></a>
+## Introduction
 
 This project has been created because many of our Azure customers required to monitor privately exposed http endpoints. As [Azure Application Insights](https://docs.microsoft.com/en-us/azure/azure-monitor/app/app-insights-overview) only offers to run availability tests against publicly exposed endpoints and [Azure Connection Monitor](https://docs.microsoft.com/en-us/azure/network-watcher/connection-monitor-overview) didn't provide advanced enough http test configurations we decided to create an alternative solution. 
 
@@ -17,9 +11,9 @@ Next to running Postman collection tests the [Azure URL Monitor](https://github.
 > **_NOTE:_**  This project is still work in progress but we decide to make it public anyhow so others can benefit from it.
 
 
-## Getting Started <a name="gettingstarted"></a>
+## Getting Started
 
-To run the monitor successfully it needs the `Instrumentation Key` of the Application Insights instance and a url to the `Postman collection URL`.
+To run the monitor successfully it needs the `Instrumentation Key` of the Application Insights instance and a url to the `Postman collection`.
 
 The `Instrumentation Key` can be found in the Overview page of your Application Insights instance.
 
