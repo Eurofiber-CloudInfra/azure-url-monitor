@@ -1,33 +1,35 @@
-FROM python:3.10-slim
+ARG ALPINE_VER=3.15
 
-ARG \
-  BUILD_DEPS="pipenv" \
-  PUID=1000
+FROM node:14-alpine${ALPINE_VER} AS node
+WORKDIR /build
+RUN npm install newman
 
-RUN set -e \
-  && apt update \
-  && apt install -yq --no-install-recommends nodejs npm tini \
-  && apt install -yq --no-install-recommends ${BUILD_DEPS}
-
-WORKDIR /provisioning
-COPY Pipfile* /provisioning/
+FROM python:3.10-alpine${ALPINE_VER} AS python
+WORKDIR /build
 RUN set -ex \
-  && pipenv install --system --deploy \
-  && npm install -g newman \
-  && apt remove -yq --purge ${BUILD_DEPS} \
-  && apt autoremove -yq \
-  && apt autoclean -yq \
-  && rm -rf /var/lib/apt/lists/*
-
-COPY docker/entrypoint.sh /
+  && apk add --no-cache gcc g++ linux-headers libffi-dev \
+  && pip install pipenv
+COPY Pipfile* ./
 RUN set -ex \
-  && rm -rf /provisioning \
-  && chmod +x /entrypoint.sh
+  && pipenv lock -r > requirements.txt \
+  && pip wheel -r requirements.txt --prefer-binary
 
+FROM python:3.10-alpine${ALPINE_VER} AS runtime
+WORKDIR /tmp/wheelhouse
+COPY --from=python --chown=root:root /build/*.whl ./
+RUN set -ex \
+  && apk add --no-cache tini nodejs \
+  && pip install *.whl \
+  && rm -rf $PWD
 WORKDIR /runtime
+COPY --from=node --chown=root:root /build/ ./
+COPY docker/entrypoint.sh /
+ENV PATH "$PATH:/runtime/node_modules/.bin/"
+ARG \
+  PUID=1000
 RUN set -ex \
-  && adduser --home /runtime --no-create-home --uid ${PUID} --disabled-password --gecos "" runtime \
-  && chown runtime /runtime
+  && adduser -g "" -u ${PUID} -h $PWD -D runtime \
+  && chmod +x /entrypoint.sh
 
 ENV \
   DEBUG=NO \
