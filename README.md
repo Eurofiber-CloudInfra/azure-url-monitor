@@ -52,6 +52,7 @@ $ ./monitor.py --ai-instrumentation-key  <your key> \
 
 ## Run as a Container
 
+### Build it Yourself 
 Build the container:
 ```
 $ docker build -t urlmonitor:latest --pull -f docker/Dockerfile .
@@ -65,6 +66,17 @@ $ docker run  -e AI_INSTRUMENTATION_KEY=<your key> \
               -e TEST_FREQUENCY_MINUTES=1 \
               urlmonitor
 ```
+
+### Use a Pre-Built Container
+
+```
+$ docker run  -e AI_INSTRUMENTATION_KEY=<your key> \
+              -e PM_COLLECTION_URL=<your collection url>\
+              -e TEST_FREQUENCY_MINUTES=1 \
+              ghcr.io/eurofiber-cloudinfra/azure-url-monitor:latest
+              
+```
+
 
 ## Run as an Azure Container Instance
 
