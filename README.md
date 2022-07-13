@@ -15,7 +15,7 @@ Next to running Postman collection tests the Azure URL Monitor can run pro-activ
 
 To run the monitor successfully it needs the `Instrumentation Key` of the Application Insights instance and a url to the `Postman collection` file.
 
-The `Instrumentation Key` can be found in the Overview page of your Application Insights instance.
+The `Instrumentation Key` can be found in the overview` page of your Application Insights instance.
 
 The `Postman collection URL` can be either to a [publicly shared Postman collection](https://learning.postman.com/docs/collaborating-in-postman/sharing/) using the JSON link option or to an [exported collection file](https://learning.postman.com/docs/getting-started/importing-and-exporting-data/#exporting-collections) on storage accessible via http.  
 
