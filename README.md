@@ -1,8 +1,8 @@
 # Introduction
 
-This project has been created because many of our Azure customers required monitoring of privately exposed http endpoints. As [Azure Application Insights](https://docs.microsoft.com/en-us/azure/azure-monitor/app/app-insights-overview) only offers to run availability tests against publicly exposed endpoints and [Azure Connection Monitor](https://docs.microsoft.com/en-us/azure/network-watcher/connection-monitor-overview) didn't provide advanced enough http test configurations we decided to create an alternative solution. 
+This project has been created as many of our Azure customers required monitoring of private http endpoints. As [Azure Application Insights](https://docs.microsoft.com/en-us/azure/azure-monitor/app/app-insights-overview) only offers to run availability tests against publicly endpoints and [Azure Connection Monitor](https://docs.microsoft.com/en-us/azure/network-watcher/connection-monitor-overview) didn't provide advanced enough http test configurations we decided to create an alternative solution. 
 
-Because we :heart: working with [Postman](https://www.postman.com) we based the configuration of the availability tests on a Postman collection. The Azure URL Monitor allows to run these tests from anywhere in your network and store the results in an [Azure Application Insights](https://docs.microsoft.com/en-us/azure/azure-monitor/app/app-insights-overview) instance.
+Because we :heart: working with [Postman](https://www.postman.com) we based the configuration of the availability tests on a Postman collection file. The Azure URL Monitor allows to run these tests from anywhere in your network and store the results in an [Azure Application Insights](https://docs.microsoft.com/en-us/azure/azure-monitor/app/app-insights-overview) instance.
 
 Next to running Postman collection tests the Azure URL Monitor can run pro-active lifetime checks on SSL certificates. 
 
@@ -13,7 +13,7 @@ Next to running Postman collection tests the Azure URL Monitor can run pro-activ
 
 # Getting Started
 
-To run the monitor successfully it needs the `Instrumentation Key` of the Application Insights instance and a url to the `Postman collection` file.
+To run the monitor successfully it needs at a minimum the `Instrumentation Key` of the Application Insights instance and an url to the `Postman collection` file.
 
 The `Instrumentation Key` can be found in the overview` page of your Application Insights instance.
 
