@@ -8,7 +8,7 @@ Next to running Postman collection tests the Azure URL Monitor can run pro-activ
 
 ![concept](docs/images/azure-url-monitor-concept.drawio.png)
 
-> **_NOTE:_**  This project is still work in progress but we decide to make it public anyhow so others can benefit from it.
+> **_NOTE:_**  This project is still work in progress but feedback is always welcome.
 
 
 # Getting Started
