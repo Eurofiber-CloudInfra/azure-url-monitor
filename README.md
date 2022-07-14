@@ -23,6 +23,16 @@ The `Postman collection URL` can be either to a [publicly shared Postman collect
 
 ## Run Locally
 
+The monitor relies on the [Newman](https://learning.postman.com/docs/running-collections/using-newman-cli/command-line-integration-with-newman/), the command-line Collection Runner for Postman.
+
+Installing Newman using NPM
+- Newman can be installed locally to this project together with an updated PATH export
+```
+ $ npm install newman
+ $ export PATH=$PWD/node_modules/.bin:$PATH
+```
+- Now run the Python specific initialization
+
 Using your running Python environment:
 
 - Optionally refresh the requirements file: `pipenv requirements > requirements.txt`
