@@ -35,6 +35,15 @@ param vnet_name string = format(name_base, 'vnet', app_name)
 @description('Resource name for Container Instance')
 param ci_name string = format(name_base, 'ci', app_name)
 
+@description('The CPU request and limit of this container instance')
+param container_cpu_cores string = '0.5'
+
+@description('The The memory request  and limit in GB of this container instance')
+param container_memory_gb string = '0.5'
+
+@description('Test frequency of the Postman collection in minutes')
+param test_freuency_minutes int = 1
+
 @description('Resource name for failed test alert')
 param alert_failed_test_name string = format(name_base, 'alert-failed-test', app_name)
 
@@ -49,6 +58,7 @@ param alert_container_restart_displayname string = 'Azure URL Monitor Container 
 
 @description('URL to the Postman Collection file. By default it uses a demo collection with one successful and one failing request')
 param postman_collection_url string = 'https://www.getpostman.com/collections/772cbe72da0c0f2f0fb4'
+
 
 @description('Azure URL Monitor image name')
 param container_image string = 'ghcr.io/eurofiber-cloudinfra/azure-url-monitor:latest'
@@ -111,6 +121,9 @@ module ci 'modules/container-group.bicep' = {
     postman_collection_url: postman_collection_url
     log_id: log.outputs.id
     container_subnet_id: _container_subnet_id
+    container_cpu_cores: container_cpu_cores
+    container_memory_gb: container_memory_gb
+    test_freuency_minutes: test_freuency_minutes
   }
 }
 
