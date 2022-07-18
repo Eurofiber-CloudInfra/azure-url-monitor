@@ -10,11 +10,11 @@ param application_insights_id string
 @description('Name of the alert')
 param alert_displayname string
 
-@description('How often the metric alert is evaluated represented in ISO 8601 duration format')
+@description('How often the log alert is evaluated represented in ISO 8601 duration format')
 param evaluation_frequency string = 'PT5M'
 
 @description('The period of time (in ISO 8601 duration format) that is used to monitor alert activity based on the threshold')
-param windows_size string = 'PT15M'
+param windows_size string = 'PT5M'
 
 @minValue(0)
 @maxValue(4)
@@ -26,13 +26,12 @@ Alert Severity:
 3 = informational
 4 = verbose
 ''')
-param severity int = 2
+param severity int = 1
 
 // VARIABLES
 var _query = '''
 availabilityResults
 | where customDimensions.monitor_type == 'azure-url-monitor'
-| count
 '''
 
 //RESOURCES
@@ -44,7 +43,7 @@ resource alert 'microsoft.insights/scheduledqueryrules@2021-08-01' = {
   properties: {
     description: alert_displayname
     enabled: true
-    autoMitigate: false 
+    autoMitigate: true
     severity: severity
     evaluationFrequency: evaluation_frequency
     windowSize: windows_size
@@ -53,14 +52,13 @@ resource alert 'microsoft.insights/scheduledqueryrules@2021-08-01' = {
       allOf: [
         {
             query: _query
-            timeAggregation: 'Total'
-            metricMeasureColumn: 'Count'
+            timeAggregation: 'Count'
             dimensions: []
             operator: 'LessThanOrEqual'
             threshold: 0
             failingPeriods: {
-                numberOfEvaluationPeriods: 1
-                minFailingPeriodsToAlert: 1
+              numberOfEvaluationPeriods: 2
+              minFailingPeriodsToAlert: 2
             }
         }
       ]
