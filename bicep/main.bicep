@@ -48,8 +48,7 @@ param test_freuency_minutes int = 1
 param alert_no_data_received_name string = format(name_base, 'alert-no-data', app_name)
 
 @description('Display name for no data alert')
-param alert_no_data_received_displayname string = 'No monitoring data received from URL monitor'
-
+param alert_no_data_received_displayname string = 'No Data Received from URL Monitor'
 
 @description('Resource name for failed test alert')
 param alert_failed_test_name string = format(name_base, 'alert-failed-test', app_name)
@@ -65,7 +64,6 @@ param alert_container_restart_displayname string = 'Azure URL Monitor Container 
 
 @description('URL to the Postman Collection file. By default it uses a demo collection with one successful and one failing request')
 param postman_collection_url string = 'https://www.getpostman.com/collections/772cbe72da0c0f2f0fb4'
-
 
 @description('Azure URL Monitor image name')
 param container_image string = 'ghcr.io/eurofiber-cloudinfra/azure-url-monitor:latest'
@@ -144,27 +142,14 @@ module alert_failed_test 'modules/alert-failed-test.bicep' = {
   }
 }
 
-module alert_container_restart 'modules/alert-container-restart.bicep' = {
-  scope: rg
-  name: alert_container_restart_name
-  params: {
-    location: location
-    tags: tags
-    log_id: log.outputs.id
-    alert_displayname: alert_container_restart_displayname
-    ci_rg_name: ci.outputs.rg_name 
-    ci_name: ci.name
-    container_name: ci.outputs.container_name
-  }
-}
-
 module alert_no_data_received 'modules/alert-no-data-received.bicep' = {
   scope: rg
   name: alert_no_data_received_name
   params: {
     location: location
     tags: tags
-    alert_displayname: alert_no_data_received_displayname
     application_insights_id: appi.outputs.id
+    alert_displayname: alert_no_data_received_displayname
+    severity: 1
   }
 }
