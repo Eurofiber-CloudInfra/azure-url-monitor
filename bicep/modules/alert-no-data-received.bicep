@@ -14,7 +14,7 @@ param alert_displayname string
 param evaluation_frequency string = 'PT5M'
 
 @description('The period of time (in ISO 8601 duration format) that is used to monitor alert activity based on the threshold')
-param windows_size string = 'PT5M'
+param windows_size string = 'PT15M'
 
 @minValue(0)
 @maxValue(4)
@@ -57,8 +57,8 @@ resource alert 'microsoft.insights/scheduledqueryrules@2021-08-01' = {
             operator: 'LessThanOrEqual'
             threshold: 0
             failingPeriods: {
-              numberOfEvaluationPeriods: 2
-              minFailingPeriodsToAlert: 2
+              numberOfEvaluationPeriods: 1
+              minFailingPeriodsToAlert: 1
             }
         }
       ]
