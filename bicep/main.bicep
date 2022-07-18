@@ -44,6 +44,13 @@ param container_memory_gb string = '0.5'
 @description('Test frequency of the Postman collection in minutes')
 param test_freuency_minutes int = 1
 
+@description('Resource name for no data alert')
+param alert_no_data_received_name string = format(name_base, 'alert-no-data', app_name)
+
+@description('Display name for no data alert')
+param alert_no_data_received_displayname string = 'No monitoring data received from URL monitor'
+
+
 @description('Resource name for failed test alert')
 param alert_failed_test_name string = format(name_base, 'alert-failed-test', app_name)
 
@@ -148,5 +155,16 @@ module alert_container_restart 'modules/alert-container-restart.bicep' = {
     ci_rg_name: ci.outputs.rg_name 
     ci_name: ci.name
     container_name: ci.outputs.container_name
+  }
+}
+
+module alert_no_data_received 'modules/alert-no-data-received.bicep' = {
+  scope: rg
+  name: alert_no_data_received_name
+  params: {
+    location: location
+    tags: tags
+    alert_displayname: alert_no_data_received_displayname
+    application_insights_id: appi.outputs.id
   }
 }
