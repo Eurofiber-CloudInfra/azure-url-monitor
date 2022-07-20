@@ -1,79 +1,97 @@
+targetScope = 'subscription'
+
 /*
 
-This is an example deployment that will setup and configure all necessary resources in your environment to test the Azure URL Monitor. 
+This is an example deployment that will setup and configure all necessary resources in your environment to test the Azure URL Monitor container. 
+The container can be deployed as an Container Instance or on Virtual Machine Scale Set by using the `deployment_mode` parameter.
 It is prepared to deploy with the parameter default values but feel free to adjust it to suite your environment.
 
 */
 
-targetScope = 'subscription'
-
 // PARAMETERS
 param location string = deployment().location
-param tags object = {
-  application: 'azure url monitor'
-  environment: 'demo'
-}
+param tags object = {}
+@allowed([
+  'container_instance'
+  'virtual_machine_scale_set'
+])
+param deployment_mode string = 'virtual_machine_scale_set'
+@description('''
+  Subnet id for the deployment. When `deployment_mode` is set to 'container_instance  this subnet must have service delegation set to "Microsoft.ContainerInstance/containerGroups".
+  For a demo deployment this paramater can be left empty and use the "deploy_demo_vnet" parameter to handle demo vnet/subnet creation
+''')
+param subnet_id string = ''
+
+@description('Switch to deploy a demo vnet when no `subnet_id` paramater is provided')
+param deploy_demo_vnet bool = empty(subnet_id) ? true: false
 
 @description('Application name that the Azure URL monitor will be monitoring')
 param app_name string = 'demoapp'
 
+@description('Resource Id of the Log Analytics Workspace that will be attached to the Application Instance instance. When left empty one will be created.')
+param log_analytics_workspace_id string = ''
+
+// PARAMETERS: Resource Naming
 @description('Resource naming base template. Uses {0} for resource abbreviation and {1} for the application name')
 param name_base string = '{0}-{1}-tst-001'
-
-@description('Resource name for the Resource Group')
 param rg_name string = format(name_base, 'rg', app_name)
-
-@description('Resource name for the Log Anaytics Workspace')
 param log_name string = format(name_base, 'log', app_name)
-
-@description('Resource name for the Applications Insights Instance')
 param appi_name string = format(name_base, 'appi', app_name)
-
-@description('Resource name for demo Vnet')
 param vnet_name string = format(name_base, 'vnet', app_name)
-
-@description('Resource name for Container Instance')
 param ci_name string = format(name_base, 'ci', app_name)
+param vmss_name string = format(name_base, 'vmss', app_name)
 
-@description('The CPU request and limit of this container instance')
-param container_cpu_cores string = '0.5'
+// PARAMETERS: Container Instance
+param ci_cpu_cores string = '0.5'
+param ci_memory_gb string = '0.5'
 
-@description('The The memory request  and limit in GB of this container instance')
-param container_memory_gb string = '0.5'
+// PARAMETERS: Virtual Machine Scale Set
+param vmss_instance_count int = 1
+@secure()
+@description('Local vmss admin password, when left empty a random password will be generated in the vmss module')
+param vmss_admin_password  string = ''
+param vmss_admin_username string = 'monitor-admin'
+param vmss_diag_storage_account_name string = ''
+param vmss_enable_system_assigned_identity bool = false
 
-@description('Test frequency of the Postman collection in minutes')
-param test_freuency_minutes int = 1
-
-@description('Resource name for failed test alert')
-param alert_failed_test_name string = format(name_base, 'alert-failed-test', app_name)
-
-@description('Display name for failed test alert')
-param alert_failed_test_displayname string = 'Availability Test Failed for ${toUpper(app_name)}'
-
-@description('Resource name for container restart  alert')
-param alert_container_restart_name string = format(name_base, 'alert-container-restart', app_name)
-
-@description('Display name for container restart  alert')
-param alert_container_restart_displayname string = 'Azure URL Monitor Container Restarted'
+// PARAMETERS: Url Monitor Container 
+@description('Azure URL Monitor image name')
+param container_image string = 'ghcr.io/eurofiber-cloudinfra/azure-url-monitor:latest'
 
 @description('URL to the Postman Collection file. By default it uses a demo collection with one successful and one failing request')
 param postman_collection_url string = 'https://www.getpostman.com/collections/772cbe72da0c0f2f0fb4'
 
+@description('Test frequency of the Postman collection in minutes')
+param test_frequency_minutes int = 1
 
-@description('Azure URL Monitor image name')
-param container_image string = 'ghcr.io/eurofiber-cloudinfra/azure-url-monitor:latest'
+@description('Name of the test location shown in Application Inights, when left empty it defaults to the ip address of container')
+param monitor_location string = ''
 
 @description('''
-  Subnet id for the Container Instance deployment. The subnet must have service delegation set to "Microsoft.ContainerInstance/containerGroups".
-  For a demo deployment this paramater can be left empty and use the "deploy_demo_vnet" parameter to handle demo vnet/subnet creation
+  Used only in VMSS deployment! Specify custom ip host mappings to override default container resolve behaviour. eg: 
+  {
+    'somehost.example.com': '10.1.1.1'
+    'otherhost.example.com': '10.2.2.2'
+  }
 ''')
-param container_subnet_id string = ''
+param container_extra_hosts object = {}
 
-@description('Switch to deploy a demo vnet with a delegated subnet for the Container Instance. Must be set to "false" when a container_subnet_id is provided')
-param deploy_demo_vnet bool = true
+// PARAMETERS: Application Insights Alerts
+param alert_failed_test_name string = format(name_base, 'alert-failed-test', app_name)
+param alert_failed_test_displayname string = 'Availability Test Failed for ${toUpper(app_name)}'
+param alert_no_data_received_name string = format(name_base, 'alert-no-data', app_name)
+param alert_no_data_received_displayname string = 'No Data Received from URL Monitor'
 
 // VARIABLES
-var _container_subnet_id = deploy_demo_vnet && empty(container_subnet_id) ? vnet.outputs.container_subnet_id : container_subnet_id
+var _ci_subnet_id = deploy_demo_vnet && empty(subnet_id) ? vnet.outputs.container_subnet_id : subnet_id
+var _vmss_subnet_id = deploy_demo_vnet && empty(subnet_id) ? vnet.outputs.vmss_subnet_id : subnet_id
+var _log_id = empty(log_analytics_workspace_id) ? log.outputs.id : log_analytics_workspace_id
+var _container_environment = {
+  AI_INSTRUMENTATION_KEY: appi.outputs.instrumentation_key
+  PM_COLLECTION_URL: postman_collection_url
+  TEST_FREQUENCY_MINUTES: string(test_frequency_minutes)
+  LOCATION: monitor_location
+}
 
 // RESOURCES
 resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
@@ -82,7 +100,7 @@ resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   tags: tags
 }
 
-module log 'modules/log-analytics.bicep' = {
+module log 'modules/log-analytics.bicep' = if (empty(log_analytics_workspace_id)) {
   scope: rg
   name: log_name
   params: {
@@ -97,11 +115,11 @@ module appi 'modules/application-insghts.bicep' = {
   params: {
     location: location
     tags: tags
-    log_id: log.outputs.id
+    log_id: _log_id
   }
 }
 
-module vnet 'modules/demo-vnet.bicep' = if (deploy_demo_vnet && empty(container_subnet_id)) {
+module vnet 'modules/demo-vnet.bicep' = if (deploy_demo_vnet) {
   name: vnet_name
   scope: rg
   params: {
@@ -110,20 +128,37 @@ module vnet 'modules/demo-vnet.bicep' = if (deploy_demo_vnet && empty(container_
   }
 }
 
-module ci 'modules/container-group.bicep' = {
+module ci 'modules/container-group.bicep' = if (deployment_mode == 'container_instance') {
   scope: rg
   name: ci_name
   params: {
     location: location
     tags: tags
+    log_id: _log_id
+    ci_subnet_id: _ci_subnet_id
+    ci_cpu_cores: ci_cpu_cores
+    ci_memory_gb: ci_memory_gb
     container_image: container_image
-    ai_instrumentation_key: appi.outputs.instrumentation_key
-    postman_collection_url: postman_collection_url
-    log_id: log.outputs.id
-    container_subnet_id: _container_subnet_id
-    container_cpu_cores: container_cpu_cores
-    container_memory_gb: container_memory_gb
-    test_freuency_minutes: test_freuency_minutes
+    container_environment: _container_environment
+  }
+}
+
+module vmss 'modules/virtual-machine-scale-set.bicep' = if (deployment_mode == 'virtual_machine_scale_set') {
+  scope: rg
+  name: vmss_name
+  params: {
+    location: location
+    tags: tags
+    vmss_name: vmss_name
+    vmss_admin_username: vmss_admin_username
+    vmss_admin_password: vmss_admin_password
+    vmss_instance_count: vmss_instance_count
+    vmss_diag_storage_account_name: vmss_diag_storage_account_name
+    vmss_enable_system_assigned_identity: vmss_enable_system_assigned_identity
+    vmss_subnet_id: _vmss_subnet_id
+    container_image: container_image
+    container_environment: _container_environment
+    container_extra_hosts: container_extra_hosts
   }
 }
 
@@ -137,16 +172,14 @@ module alert_failed_test 'modules/alert-failed-test.bicep' = {
   }
 }
 
-module alert_container_restart 'modules/alert-container-restart.bicep' = {
+module alert_no_data_received 'modules/alert-no-data-received.bicep' = {
   scope: rg
-  name: alert_container_restart_name
+  name: alert_no_data_received_name
   params: {
     location: location
     tags: tags
-    log_id: log.outputs.id
-    alert_displayname: alert_container_restart_displayname
-    ci_rg_name: ci.outputs.rg_name 
-    ci_name: ci.name
-    container_name: ci.outputs.container_name
+    application_insights_id: appi.outputs.id
+    alert_displayname: alert_no_data_received_displayname
+    severity: 1
   }
 }
