@@ -13,8 +13,8 @@ param container_image string
   When left empty the Container Instance will run in an Azure defined private space which will not be able to communicate to your internal network.  
 ''')
 param ci_subnet_id string
-param ci_cpu_cores string 
-param ci_memory_gb string
+param ci_cpu_cores string = '0.5'
+param ci_memory_gb string = '0.5'
 param ci_name string = deployment().name
 param container_environment object
 

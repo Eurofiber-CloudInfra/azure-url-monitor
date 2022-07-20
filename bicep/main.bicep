@@ -4,7 +4,7 @@ targetScope = 'subscription'
 
 This is an example deployment that will setup and configure all necessary resources in your environment to test the Azure URL Monitor container. 
 The container can be deployed as an Container Instance or on Virtual Machine Scale Set by using the `deployment_mode` parameter.
-It is prepared to deploy with the parameter default values but feel free to adjust it to suite your environment.
+It is prepared to deploy with the parameter default values but feel free to adjust it to suit your environment.
 
 */
 
@@ -40,10 +40,6 @@ param appi_name string = format(name_base, 'appi', app_name)
 param vnet_name string = format(name_base, 'vnet', app_name)
 param ci_name string = format(name_base, 'ci', app_name)
 param vmss_name string = format(name_base, 'vmss', app_name)
-
-// PARAMETERS: Container Instance
-param ci_cpu_cores string = '0.5'
-param ci_memory_gb string = '0.5'
 
 // PARAMETERS: Virtual Machine Scale Set
 param vmss_instance_count int = 1
@@ -136,8 +132,6 @@ module ci 'modules/container-group.bicep' = if (deployment_mode == 'container_in
     tags: tags
     log_id: _log_id
     ci_subnet_id: _ci_subnet_id
-    ci_cpu_cores: ci_cpu_cores
-    ci_memory_gb: ci_memory_gb
     container_image: container_image
     container_environment: _container_environment
   }
