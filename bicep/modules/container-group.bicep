@@ -15,7 +15,7 @@ param container_image string
 param ci_subnet_id string
 param ci_cpu_cores string 
 param ci_memory_gb string
-
+param ci_name string = deployment().name
 param container_environment object
 
 @description('Resource Id of the Log Analytics Workspace')
@@ -33,7 +33,7 @@ var _subnet_id = (empty(ci_subnet_id)) ? [] : [{ id: ci_subnet_id }]
 
 // RESOURCES
 resource container_group 'Microsoft.ContainerInstance/containerGroups@2021-09-01' = {
-  name: deployment().name
+  name: ci_name
   location: location
   tags: tags
   properties: {

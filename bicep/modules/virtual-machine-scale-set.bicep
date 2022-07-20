@@ -5,7 +5,7 @@ param location string = resourceGroup().location
 param tags object = {}
 
 // PARAMETERS Scaleset
-param vmss_name string 
+param vmss_name string = deployment().name
 param vmss_instance_type string = 'Standard_B1s'
 param vmss_instance_count int
 param vmss_osdisk_type string = 'Standard_LRS'

@@ -149,7 +149,6 @@ module vmss 'modules/virtual-machine-scale-set.bicep' = if (deployment_mode == '
   params: {
     location: location
     tags: tags
-    vmss_name: vmss_name
     vmss_admin_username: vmss_admin_username
     vmss_admin_password: vmss_admin_password
     vmss_instance_count: vmss_instance_count
@@ -180,6 +179,5 @@ module alert_no_data_received 'modules/alert-no-data-received.bicep' = {
     tags: tags
     application_insights_id: appi.outputs.id
     alert_displayname: alert_no_data_received_displayname
-    severity: 1
   }
 }
