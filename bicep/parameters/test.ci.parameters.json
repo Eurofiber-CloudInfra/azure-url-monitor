@@ -34,6 +34,9 @@
         },
         "container_image": {
             "value": "ghcr.io/eurofiber-cloudinfra/azure-url-monitor:71"
+        },
+        "ci_enable_system_assigned_identity": {
+            "value": true
         }
     }
 }

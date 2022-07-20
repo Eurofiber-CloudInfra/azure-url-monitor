@@ -17,6 +17,7 @@ param ci_cpu_cores string = '0.5'
 param ci_memory_gb string = '0.5'
 param ci_name string = deployment().name
 param container_environment object
+param ci_enable_system_assigned_identity bool = false
 
 @description('Resource Id of the Log Analytics Workspace')
 param log_id string
@@ -36,6 +37,9 @@ resource container_group 'Microsoft.ContainerInstance/containerGroups@2021-09-01
   name: ci_name
   location: location
   tags: tags
+  identity: ci_enable_system_assigned_identity ? {
+    type: 'SystemAssigned'
+  }: null
   properties: {
     subnetIds: _subnet_id
     containers: [

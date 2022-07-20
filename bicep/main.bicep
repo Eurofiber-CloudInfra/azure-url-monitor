@@ -15,7 +15,7 @@ param tags object = {}
   'container_instance'
   'virtual_machine_scale_set'
 ])
-param deployment_mode string = 'virtual_machine_scale_set'
+param deployment_mode string = 'container_instance'
 @description('''
   Subnet resource id for the deployment. When `deployment_mode` is set to `container_instance`  this subnet must have service delegation set to `Microsoft.ContainerInstance/containerGroups`.
   For a demo deployment this paramater can be left empty, an example VNET will be created.
@@ -50,6 +50,9 @@ param vmss_admin_username string = 'monitor-admin'
 param vmss_diag_storage_account_name string = ''
 param vmss_enable_system_assigned_identity bool = false
 
+// PARAMETERS: Container Instance
+param ci_enable_system_assigned_identity bool = false
+
 // PARAMETERS: Url Monitor Container 
 @description('Azure URL Monitor image name')
 param container_image string = 'ghcr.io/eurofiber-cloudinfra/azure-url-monitor:latest'
@@ -60,7 +63,7 @@ param postman_collection_url string = 'https://www.getpostman.com/collections/77
 @description('Test frequency of the Postman collection in minutes')
 param test_frequency_minutes int = 1
 
-@description('Name of the test location shown in Application Inights, when left empty it defaults to the ip address of container')
+@description('Name of the test location shown in Application Inights, when left empty it defaults to the ip address of the container')
 param monitor_location string = ''
 
 @description('''
@@ -131,6 +134,7 @@ module ci 'modules/container-group.bicep' = if (deployment_mode == 'container_in
     location: location
     tags: tags
     log_id: _log_id
+    ci_enable_system_assigned_identity: ci_enable_system_assigned_identity
     ci_subnet_id: _ci_subnet_id
     container_image: container_image
     container_environment: _container_environment
