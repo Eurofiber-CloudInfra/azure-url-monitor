@@ -17,8 +17,8 @@ param tags object = {}
 ])
 param deployment_mode string = 'virtual_machine_scale_set'
 @description('''
-  Subnet id for the deployment. When `deployment_mode` is set to 'container_instance  this subnet must have service delegation set to "Microsoft.ContainerInstance/containerGroups".
-  For a demo deployment this paramater can be left empty and use the "deploy_demo_vnet" parameter to handle demo vnet/subnet creation
+  Subnet resource id for the deployment. When `deployment_mode` is set to `container_instance`  this subnet must have service delegation set to `Microsoft.ContainerInstance/containerGroups`.
+  For a demo deployment this paramater can be left empty, an example VNET will be created.
 ''')
 param subnet_id string = ''
 
