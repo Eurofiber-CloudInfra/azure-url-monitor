@@ -36,7 +36,7 @@ In this scenario the container is started on Linux Virtual Machine that is part 
 - On average 3 times cheaper
 - More flexibility on container settings
 
-The last point comes in handy when you want to for example pass additional host mappings to the container's `/etc/hosts` file for specific monitoring scenarios. This option is controlled via `compose_extra_hosts`  deployment parameter.
+The last point comes in handy when you want to for example pass additional host mappings to the container's `/etc/hosts` file for specific monitoring scenarios. This option is controlled via `container_extra_hosts`  deployment parameter.
 
 ![vmss demo](../docs/images/azure-url-monitor-demo-vmss.drawio.png)
 
