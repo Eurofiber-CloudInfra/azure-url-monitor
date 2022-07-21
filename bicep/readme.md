@@ -1,17 +1,51 @@
 
 # Introduction
-Deploys a complete set of resources to take the url monitor for a spin. Resources deployed:
+This Bicep deployment creates and configures all necessary resources to take the url monitor for a spin. It show cases a deployment of the url monitor container on a Container Instance and a Virtual Machine Scale Set. 
+
+Resources deployed:
 - Resource Group
 - Log Analytics Workspace
 - Application Insights Instance
-- Vnet with subnet delegated to 'Microsoft.ContainerInstance/containerGroups' service
-- Container Instance with Vnet integration
-- Web Availability Test Alert Rule
-- Container Restart Alert Rule
+- Virtual Network 
+- Container Instance with Vnet integration OR Virtual Machine Scale Set
+- Availability Test Failed Alert Rule
+- No Data ALert Rule
 
-Although the VNet integration is not necessary for the demo deployment it showcases an environment for running tests against private endpoints.
 
-![demo](../docs/images/azure-url-monitor-demo.drawio.png)
+## Container Instance Deployment Scenario
+
+The Container Instance is deployed with VNET integration so it can be used to monitor private endpoints. The VNET integration does require a dedicated subnet that is delegated to 'Microsoft.ContainerInstance/containerGroups'.  
+
+![demo](../docs/images/azure-url-monitor-demo-ci.drawio.png)
+
+
+To deploy this scenario with the default options run:
+
+```
+ $ az login
+ $ az account set --subscription <YOUR SUBSCRIPTION ID> 
+ $ az deployment sub create --location <YOUR LOCATION> --template-file main.bicep  --parameters deployment_mode=container_instance
+```
+
+If you want to override specific parameters you can user a [parameter file](https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/parameter-files). Examples can be found in the `/bicep/parameters` folder. 
+
+
+## Virtual Machine Scale Set Deployment Scenario
+
+In this scenario the container is started on Linux Virtual Machine that is part of a Scale Set. Compared to a Container Instance deployment the Virtual Machine Scale Set deployment has the following advantages:
+- No need for a delegated subnet
+- On average 3 times cheaper
+- More flexibility on container settings
+
+The last point comes in handy when you want to for example pass additional host mapping to the container /etc/host file for specific monitoring scenarios. This is controlled via `compose_extra_hosts`  parameter.
+
+To deploy this scenario with the default options run:
+
+```
+ $ az login
+ $ az account set --subscription <YOUR SUBSCRIPTION ID> 
+ $ az deployment sub create --location <YOUR LOCATION> --template-file main.bicep  --parameters deployment_mode=container_instance
+``
 
 # Deployment
 
