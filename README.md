@@ -97,7 +97,7 @@ docker run  -e AI_INSTRUMENTATION_KEY=<your key> \
 
 Check the [Bicep code](bicep/readme.md) of the demo deployment.
 
-## Run one an Azure Virtual Machine Scale Set
+## Run on an Azure Virtual Machine Scale Set
 
 Check the [Bicep code](bicep/readme.md) of the demo deployment.
 
