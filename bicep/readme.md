@@ -16,7 +16,7 @@ The deployment uses a pre-defined shared Postman collection that includes one su
 # Deployment 
 ## Container Instance Scenario
 
-The Container Instance is deployed with VNET integration so it can be used to monitor private endpoints. The VNET integration does require a dedicated subnet that is delegated to 'Microsoft.ContainerInstance/containerGroups'. If the scenario is deployed with the default options an appropriate VNET is created.
+The Container Instance is deployed with VNET integration so it can be used to monitor private endpoints. The VNET integration does require a dedicated subnet that is delegated to `Microsoft.ContainerInstance/containerGroups`. If the scenario is deployed with the default options an appropriate VNET is created.
 
 ![ci demo](../docs/images/azure-url-monitor-demo-ci.drawio.png)
 
@@ -50,15 +50,23 @@ To deploy this scenario with the default options run:
 
 ## Customizing Deployments
 
-To override specific parameters use a [parameter file](https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/parameter-files). Examples can be found in the `/bicep/parameters/` folder. 
+To override specific deployment it is best to use a [parameter file](https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/parameter-files). Examples can be found in the `/bicep/parameters/` folder. 
 
+To deploy this demo using your own parameter file run:
+```
+ $ az login
+ $ az account set --subscription <YOUR SUBSCRIPTION ID> 
+ $ az deployment sub create --location <YOUR LOCATION> --template-file main.bicep  --parameters @your.parameters.json
+```
 
 
 # Verify Deployment
 
 ## Availability Test Results
 
-After a successful deployment it might take a couple of minutes before the environment is ready. To see the test results goto the demo **Application Insights** resource in the Azure portal and select `Availability` from the left menu. This will show the results of the two test requests. To see the test result details click on the `Failed` button on the bottom rights and select one of the failed tests. 
+After a successful deployment it might take a couple of minutes before the environment is ready. To see the test results goto the demo **Application Insights** resource in the Azure portal and select `Availability` from the left menu. This will show the results of the two test requests. 
+
+To see the test result details click on the `Failed` button on the bottom rights and select one of the failed tests (initially there might be an additional delay before the individual test results start showing up...be patient). 
 
 ![demo-results](../docs/images/demo-results.png)
 
