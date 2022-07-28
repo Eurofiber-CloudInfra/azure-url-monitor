@@ -52,6 +52,7 @@ from urlpath import URL
 app = typer.Typer()
 testcmd = "newman"
 testcmd_opts = "run --insecure --reporters json"
+monitor_type = "azure-url-monitor"
 
 # logging setup
 format = "%(asctime)s - %(levelname)s - %(message)s"
@@ -273,6 +274,7 @@ class check_result_document(pm_item):
         output = dict(
             item_id=self.id,
             item_name=self.name,
+            monitor_type = monitor_type
         )
         if self.response:
             rsp_output = dict(

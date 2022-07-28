@@ -4,14 +4,6 @@ targetScope = 'resourceGroup'
 param location string 
 param tags object
 
-// VARIABLES
-var _subnets = [
-  {
-    name: 'container-instances'
-    prefix: '10.0.0.0/24'
-  }
-]
-
 // RESOURCES
 resource vnet 'Microsoft.Network/virtualNetworks@2020-06-01' = {
   name: deployment().name
@@ -23,22 +15,31 @@ resource vnet 'Microsoft.Network/virtualNetworks@2020-06-01' = {
         '10.0.0.0/16'
       ]
     }
-    subnets:  [for (subnet, idx) in _subnets: { 
-      name: subnet.name
-      properties: {
-        addressPrefix: subnet.prefix
-        delegations: [
-          {
-            name: 'aci-subnet-delegation'
-            properties: {
-              serviceName: 'Microsoft.ContainerInstance/containerGroups'
+    subnets:  [ 
+      { 
+        name: 'container-instances'
+        properties: {
+          addressPrefix: '10.0.0.0/24'
+          delegations: [ 
+            {
+              name: 'aci-subnet-delegation'
+              properties: {
+                serviceName: 'Microsoft.ContainerInstance/containerGroups'
+              }
             }
-          }
-        ]
+          ]
+        }
       }
-    }]
+      { 
+        name: 'virtual-machine_scale-set'
+        properties: {
+          addressPrefix: '10.0.1.0/24'
+        }
+      }   
+    ]
   }
 }
 
 // OUTPUTS
 output container_subnet_id string = vnet.properties.subnets[0].id
+output vmss_subnet_id string = vnet.properties.subnets[1].id
