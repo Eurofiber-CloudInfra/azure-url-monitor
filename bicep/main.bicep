@@ -63,6 +63,27 @@ param postman_collection_url string = 'https://www.getpostman.com/collections/77
 @description('Test frequency of the Postman collection in minutes')
 param test_frequency_minutes int = 1
 
+@description('Newman collection run timeout in ms')
+param nm_timeout_collection int = 300000
+
+@description('Newman request timeout in ms')
+param nm_timeout_request int = 5000
+
+@description('Newman script timeout in ms')
+param nm_timeout_script int = 5000
+
+@description('Enable/disable certificate validation. When enabled the test will fail if the certificate is not valid.')
+param certificate_validation_check bool = true
+
+@description('Enable/disable certificate failure when encountering self-signed certificates.')
+param certificate_ignore_self_signed bool = false
+
+@description('Enable/disable certificate expiration check. When enabled the test will fail if certificate expires with the number of days specified in CERTIFICATE_EXPIRATION_DAYS')
+param certificate_check_expiration bool = true
+
+@description('Number of days before the certificate will expire.')
+param certificate_expiration_gracetime_days int = 14
+
 @description('Name of the test location shown in Application Inights, when left empty it defaults to the ip address of the container')
 param monitor_location string = ''
 
@@ -90,6 +111,13 @@ var _container_environment = {
   PM_COLLECTION_URL: postman_collection_url
   TEST_FREQUENCY_MINUTES: string(test_frequency_minutes)
   LOCATION: monitor_location
+  NM_TIMEOUT_COLLECTION: string(nm_timeout_collection)
+  NM_TIMEOUT_REQUEST: string(nm_timeout_request)
+  NM_TIMEOUT_SCRIPT: string(nm_timeout_script)
+  CERTIFICATE_VALIDATION_CHECK: toUpper(string(certificate_validation_check))
+  CERTIFICATE_IGNORE_SELF_SIGNED: toUpper(string(certificate_ignore_self_signed))
+  CERTIFICATE_CHECK_EXPIRATION: toUpper(string(certificate_check_expiration))
+  CERTIFICATE_EXPIRATION_GRACETIME_DAYS: string (certificate_expiration_gracetime_days)
 }
 
 // RESOURCES
