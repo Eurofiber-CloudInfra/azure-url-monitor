@@ -89,7 +89,7 @@ resource vmss 'Microsoft.Compute/virtualMachineScaleSets@2021-04-01' = {
         enableAutomaticOSUpgrade: true
         disableAutomaticRollback: false
       } 
-      mode: 'Rolling'
+      mode: 'Automatic'
     }
     virtualMachineProfile: {
       osProfile: {
