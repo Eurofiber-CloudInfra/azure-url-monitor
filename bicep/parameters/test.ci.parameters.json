@@ -1,0 +1,42 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "tags": {
+            "value": {
+                "environment": "test",
+                "scenario": "container instance"
+            }
+        },
+        "deployment_mode": {
+            "value": "container_instance"
+        },
+        "subnet_id": {
+            "value": ""
+        },
+        "name_base": {
+            "value": "{0}-{1}-tst-001"
+        },
+        "app_name": {
+            "value": "test-ci"
+        },
+        "log_analytics_workspace_id": {
+            "value": ""
+        },
+        "postman_collection_url": {
+            "value": "https://www.getpostman.com/collections/772cbe72da0c0f2f0fb4"
+        },
+        "test_frequency_minutes": {
+            "value": 2
+        },
+        "monitor_location": {
+            "value": "container instance"
+        },
+        "container_image": {
+            "value": "ghcr.io/eurofiber-cloudinfra/azure-url-monitor:71"
+        },
+        "ci_enable_system_assigned_identity": {
+            "value": true
+        }
+    }
+}
